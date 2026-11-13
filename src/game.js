@@ -588,7 +588,7 @@ class Component extends DCLogic {
   // ---- audio ----
   ensureAudio() {
     if (!this.ac) {
-      try { this.ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { }
+      try { const AC = window.AudioContext || window.webkitAudioContext; try { this.ac = new AC({ latencyHint: 'interactive' }); } catch (e2) { this.ac = new AC(); } } catch (e) { }
     }
     if (this.ac && this.ac.state === 'suspended') this.ac.resume();
     // preload the result count-up sfx
@@ -717,9 +717,12 @@ class Component extends DCLogic {
     const v = vol || 1;
     if (color === 'yellow') { // hi-hat — short bright metallic noise burst
       const dur = 0.09;
-      const nb = ac.createBuffer(1, ac.sampleRate * dur, ac.sampleRate);
-      const nd = nb.getChannelData(0);
-      for (let i = 0; i < nd.length; i++) nd[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / nd.length, 1.5);
+      let nb = this.hatBuf;
+      if (!nb) {
+        nb = this.hatBuf = ac.createBuffer(1, Math.round(ac.sampleRate * dur), ac.sampleRate);
+        const nd = nb.getChannelData(0);
+        for (let i = 0; i < nd.length; i++) nd[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / nd.length, 1.5);
+      }
       const src = ac.createBufferSource(); src.buffer = nb;
       const hp = ac.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 7000;
       const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 10000; bp.Q.value = 0.7;
@@ -817,12 +820,10 @@ class Component extends DCLogic {
     if (color === 'blue' && (this.currentSong().drums || 2) !== 3 && !((this.notes || []).some((n) => n.color === 'blue'))) return;
     // armed (waiting for Tap to Start): the first D/F press or drum tap begins the song
     // (that tap also plays the sound of the drum that was hit)
-    if (this.state.armed) { this.flash(color); this.playSound(color, 1); this.startFromArmed(); return; }
-    const now = Date.now();
-    this.flash(color);
+    if (this.state.armed) { this.playSound(color, 1); this.flash(color); this.startFromArmed(); return; }
     // Allow tapping during the final count-in beat ("GO", countdown===0): the playhead is
     // still parked at 0, so the first note gets an early judgement window instead of late-only.
-    if (!this.state.playing && this.state.countdown !== 0) { this.playSound(color, 1); return; }
+    if (!this.state.playing && this.state.countdown !== 0) { this.playSound(color, 1); this.flash(color); return; }
 
     const ph = this.playhead, { good, great, perfect } = this.windows();
     let best = -1, bestd = 1e9;
@@ -835,7 +836,8 @@ class Component extends DCLogic {
 
     // beat-1 (downbeat) notes play the SFX 20% louder
     const isDownbeat = best >= 0 && bestd <= good && (this.notes[best].step % 16 === 0);
-    this.playSound(color, isDownbeat ? 1.2 : 1);
+    this.playSound(color, isDownbeat ? 1.2 : 1); // tiếng trống phát ngay, trước mọi việc vẽ lại
+    this.flash(color);
 
     if (best >= 0 && bestd <= good) {
       this.status[best] = 'hit';

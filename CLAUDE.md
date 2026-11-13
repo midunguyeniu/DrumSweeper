@@ -105,6 +105,10 @@ Màn chọn bài có 2 tab trên cùng: **Learn** và **FreePlay** (trạng thá
 
 Màn kết quả và màn thua: chạm trống hoặc bấm F/Space/J không phát tiếng (chốt ở `drumHandler` và `hit()` theo `showResult`/`showFail`). Đã kiểm 2026-11-13 (đếm tiếng phát ra): 0 tiếng ở màn kết quả, trong lúc chơi vẫn có tiếng.
 
+Độ trễ tiếng trống (2026-11-13): trong `hit()` tiếng phát trước, rồi mới nháy trống và cập nhật điểm; `AudioContext` tạo với `latencyHint: "interactive"`; tiếng hi-hat dùng lại một bộ đệm. Đo bằng giả lập (CPU chậm 4 lần, bài 3 trống dày): từ lúc chạm tới lúc tiếng được lệnh phát chỉ 3 đến 22 ms, nên phần trễ nghe thấy trên điện thoại thật nhiều khả năng đến từ đường âm thanh của máy (Android, tai nghe Bluetooth), chưa đo được trên máy thật.
+
+Hai nút SONG LIST / PLAY AGAIN ở màn kết quả và màn thua cùng cỡ 150x50 px, cả hai đều có đổ bóng dưới (kiểu nút nổi).
+
 ## Nút ▶/❚❚ trên cùng ở màn chơi
 
 Bị mờ (opacity 0,35) và không bấm được trong lúc đếm 3-2-1 (`state.countdown != null`; `playBtnStyle` + chốt trong `togglePlay`). Đã kiểm 2026-11-13 (giả lập): mờ suốt lúc đếm, hết đếm thì sáng lại thành ❚❚; chưa thử bấm thẳng vào nút lúc đang mờ.

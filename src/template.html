@@ -315,7 +315,7 @@
             </div>
             <div style="flex:none; display:flex; flex-direction:column; gap:8px; position:relative; width:86px; align-self:flex-start;">
               {{ song.hintEl }}
-              <button onclick="{{ song.playPlay }}" style="display:flex; align-items:center; justify-content:center; gap:4px; padding:6px 10px; border:none; border-radius:10px; background:linear-gradient(180deg,#ffcc33,#ff9c1a); color:#5a2a00; font-size:12px; font-weight:800; letter-spacing:.5px; cursor:pointer; box-shadow:0 3px 0 #a24a08;">▶ Play</button>
+              <button onclick="{{ song.playPlay }}" style="display:flex; align-items:center; justify-content:center; gap:4px; padding:6px 10px; border:none; border-radius:10px; background:linear-gradient(180deg,#ffcc33,#ff9c1a); color:#5a2a00; font-size:12px; font-weight:800; letter-spacing:.5px; cursor:pointer;">▶ Play</button>
               {{ song.resultEl }}
               <sc-if value="{{ song.showLearn }}" hint-placeholder-val="{{ true }}">
                 <button onclick="{{ song.playLearn }}" style="{{ song.learnStyle }}">{{ song.learnLabel }}</button>
@@ -343,8 +343,8 @@
       <div style="font-size:34px; font-weight:800; color:#ff5a5a; letter-spacing:3px; text-shadow:0 3px 0 #7a1010;">LEVEL FAILED</div>
       <div style="font-size:14px; color:#c9b8a6; text-align:center; max-width:260px; line-height:1.5;">You missed too many notes in a row.</div>
       <div style="display:flex; gap:14px; margin-top:6px;">
-        <button onclick="{{ backToList }}" style="padding:14px 22px; border:2px solid rgba(255,255,255,.25); border-radius:14px; background:rgba(255,255,255,.06); color:#ffe9c7; font-size:15px; font-weight:700; letter-spacing:.5px; cursor:pointer;">SONG LIST</button>
-        <button onclick="{{ restart }}" style="padding:14px 26px; border:none; border-radius:14px; background:linear-gradient(180deg,#ffcc33,#ff9c1a); color:#5a2a00; font-size:15px; font-weight:800; letter-spacing:.5px; cursor:pointer; box-shadow:0 4px 0 #a24a08;">PLAY AGAIN</button>
+        <button onclick="{{ backToList }}" style="width:150px; height:50px; box-sizing:border-box; padding:0; border:2px solid rgba(255,255,255,.25); border-radius:14px; background:rgba(255,255,255,.06); color:#ffe9c7; font-size:15px; font-weight:800; letter-spacing:.5px; box-shadow:0 4px 0 #3a3a44; cursor:pointer;">SONG LIST</button>
+        <button onclick="{{ restart }}" style="width:150px; height:50px; box-sizing:border-box; padding:0; border:none; border-radius:14px; background:linear-gradient(180deg,#ffcc33,#ff9c1a); color:#5a2a00; font-size:15px; font-weight:800; letter-spacing:.5px; cursor:pointer; box-shadow:0 4px 0 #a24a08;">PLAY AGAIN</button>
       </div>
     </div>
   </sc-if>
@@ -382,8 +382,8 @@
       <div style="font-size:13px; color:#c9b8a6; margin-top:2px;">Max Combo {{ bestShown }} · {{ hitsShown }}/{{ total }} hits</div>
 
       <div style="display:flex; gap:12px; margin-top:14px;">
-        <button onclick="{{ backToList }}" style="padding:14px 22px; border:2px solid rgba(255,204,51,.4); border-radius:16px; background:rgba(0,0,0,.3); color:#ffcc33; font-size:15px; font-weight:600; letter-spacing:1px; cursor:pointer;">SONG LIST</button>
-        <button onclick="{{ restart }}" style="padding:14px 26px; border:none; border-radius:16px; background:linear-gradient(180deg,#ffcc33,#ff9c1a); color:#5a2a00; font-size:15px; font-weight:700; letter-spacing:1px; box-shadow:0 6px 0 #a24a08; cursor:pointer;">PLAY AGAIN</button>
+        <button onclick="{{ backToList }}" style="width:150px; height:50px; box-sizing:border-box; padding:0; border:2px solid rgba(255,204,51,.4); border-radius:16px; background:rgba(0,0,0,.3); color:#ffcc33; font-size:15px; font-weight:700; letter-spacing:1px; box-shadow:0 6px 0 #4a3a12; cursor:pointer;">SONG LIST</button>
+        <button onclick="{{ restart }}" style="width:150px; height:50px; box-sizing:border-box; padding:0; border:none; border-radius:16px; background:linear-gradient(180deg,#ffcc33,#ff9c1a); color:#5a2a00; font-size:15px; font-weight:700; letter-spacing:1px; box-shadow:0 6px 0 #a24a08; cursor:pointer;">PLAY AGAIN</button>
       </div>
       <sc-if value="{{ showNext }}" hint-placeholder-val="{{ false }}">
         <button onclick="{{ nextLevel }}" style="margin-top:6px; padding:15px 40px; border:2px solid #7fd8ff; border-radius:16px; background:linear-gradient(180deg,#4bb8ff,#2a86e0); color:#ffffff; font-size:20px; font-weight:700; letter-spacing:1px; box-shadow:0 6px 0 #175f9e, 0 0 18px rgba(75,184,255,.6); cursor:pointer;">Next Level →</button>
