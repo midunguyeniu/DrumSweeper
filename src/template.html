@@ -283,34 +283,48 @@
 
   <!-- SONG SELECT -->
   <sc-if value="{{ showSongSelect }}" hint-placeholder-val="{{ true }}">
-    <div style="position:absolute; inset:0; z-index:10; background:rgba(10,7,6,.92); backdrop-filter:blur(3px); display:flex; flex-direction:column; align-items:center; padding:34px 12px 22px; overflow-y:auto;">
+    <div style="position:absolute; inset:0; z-index:10; background:rgba(10,7,6,.92); backdrop-filter:blur(3px); display:flex; flex-direction:column; align-items:center; padding:34px 12px 22px; overflow:hidden;">
       <div style="font-size:32px; font-weight:700; color:#ff5a2c; text-shadow:0 3px 0 #7a1608, 0 0 30px rgba(255,90,30,.6); letter-spacing:1px; text-align:center;">DrumSweeper</div>
       <div style="font-size:13px; letter-spacing:3px; color:#ffb066; font-weight:600; margin:2px 0 16px;">SONG LIST</div>
+      <div style="display:flex; gap:10px; width:100%; max-width:400px; margin-bottom:10px;">
+        <button onclick="{{ selectLearn }}" style="{{ learnTabStyle }}">Learn</button>
+        <button onclick="{{ selectFree }}" style="{{ freeTabStyle }}">FreePlay</button>
+      </div>
       <div style="display:flex; gap:10px; width:100%; max-width:400px; margin-bottom:16px;">
         <button onclick="{{ selectTab2 }}" style="{{ tab2Style }}">2-Drums</button>
         <button onclick="{{ selectTab3 }}" style="{{ tab3Style }}">3-Drums</button>
       </div>
-      <div style="display:flex; flex-direction:column; gap:12px; width:100%; max-width:400px;">
-        <sc-if value="{{ emptyTab }}" hint-placeholder-val="{{ false }}">
-          <div style="padding:36px 18px; border:2px dashed rgba(255,255,255,.14); border-radius:16px; text-align:center; color:#8a7a6a; font-size:14px; line-height:1.5;">No songs yet.<br>Coming soon.</div>
+      <div style="display:flex; flex-direction:column; gap:12px; width:100%; max-width:400px; flex:1 1 0; min-height:0; overflow-y:auto; box-sizing:border-box; padding:2px 2px 8px; scrollbar-width:thin; scrollbar-color:#4a4f66 transparent;">
+        <sc-if value="{{ listMessage }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:36px 18px; border:2px dashed rgba(255,255,255,.14); border-radius:16px; text-align:center; color:#8a7a6a; font-size:14px; line-height:1.5;">{{ listMessage }}</div>
         </sc-if>
         <sc-for list="{{ songs }}" as="song" hint-placeholder-count="6">
           <div style="display:flex; align-items:center; gap:10px; padding:12px 12px; border:2px solid rgba(255,255,255,.08); border-radius:16px; background:linear-gradient(180deg,#1c2130,#141827); box-shadow:0 5px 14px rgba(0,0,0,.4);">
             <div style="{{ song.badgeStyle }}">{{ song.badgeEl }}</div>
             <div style="flex:1; min-width:0;">
               <div style="font-size:clamp(11px,3.7vw,16px); font-weight:700; color:#ffe9c7; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ song.title }}</div>
-              <div style="font-size:12px; color:#8a93b5; margin-top:2px;">{{ song.bpm }} BPM</div>
+              <div style="font-size:12px; color:#8a93b5; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ song.subLine }}</div>
               <div style="margin-top:4px;">{{ song.starEls }}</div>
             </div>
             <div style="flex:none; display:flex; flex-direction:column; gap:6px; position:relative;">
               {{ song.hintEl }}
               <button onclick="{{ song.playPlay }}" style="display:flex; align-items:center; justify-content:center; gap:4px; padding:7px 10px; border:none; border-radius:10px; background:linear-gradient(180deg,#ffcc33,#ff9c1a); color:#5a2a00; font-size:12px; font-weight:800; letter-spacing:.5px; cursor:pointer; box-shadow:0 3px 0 #a24a08;">▶ Play</button>
-              <button onclick="{{ song.playLearn }}" style="{{ song.learnStyle }}">{{ song.learnLabel }}</button>
+              <sc-if value="{{ song.showLearn }}" hint-placeholder-val="{{ true }}">
+                <button onclick="{{ song.playLearn }}" style="{{ song.learnStyle }}">{{ song.learnLabel }}</button>
+              </sc-if>
             </div>
           </div>
         </sc-for>
       </div>
-      <div class="kbd-hint" style="font-size:12px; color:#8a7a6a; letter-spacing:1px; margin-top:18px;">{{ keyHint }}</div>
+      <sc-if value="{{ showLoadError }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute; left:16px; right:16px; bottom:18px; z-index:30; padding:12px 14px; border-radius:12px; background:#4a1e1e; border:1px solid rgba(255,120,100,.5); color:#ffd9cf; font-size:13px; font-weight:600; text-align:center; box-shadow:0 6px 18px rgba(0,0,0,.5);">{{ loadError }}</div>
+      </sc-if>
+      <sc-if value="{{ songLoading }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute; inset:0; z-index:40; background:rgba(10,7,6,.88); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:24px; text-align:center;">
+          <div style="font-size:15px; letter-spacing:2px; color:#ffb066; font-weight:700; animation:pulseGlow 1.2s ease-in-out infinite;">DOWNLOADING SONG</div>
+          <div style="font-size:20px; font-weight:700; color:#ffe9c7;">{{ loadingTitle }}</div>
+        </div>
+      </sc-if>
     </div>
   </sc-if>
 

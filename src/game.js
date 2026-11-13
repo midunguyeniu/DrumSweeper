@@ -2,7 +2,6 @@
 class Component extends DCLogic {
   STEPS = 32; // steps in the visible bar window (2 bars)
   DUCK_LEVEL = 0.3; // bài import: mức nhạc ở phách 1-2 của bar 0 so với mức thường (0,3 = nhỏ hơn khoảng 10 dB); chỉnh số này để nhỏ/to hơn
-  LAZY_TRACKS = { s3d2: '@@ASSET:track-s3d2.ogg@@', s3d3: '@@ASSET:track-s3d3.ogg@@', s3d4: '@@ASSET:track-s3d4.ogg@@', s3d5: '@@ASSET:track-s3d5.ogg@@', s3d6: '@@ASSET:track-s3d6.ogg@@', s3d7: '@@ASSET:track-s3d7.ogg@@', s3d8: '@@ASSET:track-s3d8.ogg@@', s3d9: '@@ASSET:track-s3d9.ogg@@', s3d10: '@@ASSET:track-s3d10.ogg@@', s3d11: '@@ASSET:track-s3d11.ogg@@', s3d12: '@@ASSET:track-s3d12.ogg@@', s3d13: '@@ASSET:track-s3d13.ogg@@', s3d14: '@@ASSET:track-s3d14.ogg@@', s3d15: '@@ASSET:track-s3d15.ogg@@' };
 
   // 6 songs, difficulty rising. Each pattern is one 4/4 bar = 16 sixteenth-steps
   // (4 steps per beat). F = red drum, A = blue drum. The bar repeats `bars` times.
@@ -33,22 +32,65 @@ class Component extends DCLogic {
     { id: 's8', num: 9, title: 'Syncopation', bpm: 113, difficulty: 'Hard', stars: 4.5, bars: 16, sections: [{ count: 3, notes: [[0, 'red'], [4, 'blue'], [6, 'red'], [10, 'red'], [12, 'blue']] }, { count: 1, notes: [[0, 'red'], [0, 'blue'], [4, 'red'], [4, 'blue'], [8, 'red'], [8, 'blue'], [12, 'red'], [12, 'blue']] }, { count: 3, notes: [[0, 'red'], [4, 'blue'], [6, 'red'], [10, 'red'], [12, 'blue']] }, { count: 1, notes: [[0, 'red'], [2, 'blue'], [4, 'blue'], [5, 'red'], [8, 'blue'], [10, 'red'], [12, 'blue'], [14, 'blue']] }, { count: 3, notes: [[0, 'red'], [4, 'blue'], [6, 'red'], [10, 'red'], [12, 'blue']] }, { count: 1, notes: [[0, 'red'], [0, 'blue'], [4, 'red'], [4, 'blue'], [8, 'red'], [10, 'red'], [12, 'blue'], [14, 'blue']] }, { count: 3, notes: [[0, 'red'], [4, 'blue'], [6, 'red'], [10, 'red'], [12, 'blue']] }, { count: 1, notes: [[0, 'red'], [0, 'blue']] }] }
     ,
     { id: 's3d1', num: 1, title: 'Hi-Hat Intro', bpm: 79, difficulty: 'Normal', stars: 2.5, bars: 17, drums: 3, sections: [{ count: 4, notes: [[0, 'red'], [4, 'yellow'], [8, 'red'], [12, 'yellow']] }, { count: 11, notes: [[0, 'red'], [4, 'blue'], [8, 'red'], [12, 'yellow']] }, { count: 1, notes: [[0, 'red'], [0, 'yellow'], [2, 'red'], [2, 'yellow'], [4, 'red'], [4, 'yellow'], [6, 'red'], [6, 'yellow'], [8, 'red'], [8, 'yellow']] }, { count: 1, notes: [[0, 'red'], [4, 'blue']] }] },
-    { id: 's3d2', num: 2, title: 'Thinking Out Loud', bpm: 79, difficulty: 'Normal', stars: 3, bars: 20, drums: 3, abs: { red: [16,32,48,64,80,96,112,120,128,136,144,152,160,168,176,184,192,200,208,216,224,232,240,248,256,264,272,280,288], blue: [24,40,56,72,88,104,148,156,164,172,180,188,196,204,212,220,228,236,244,252,260,268,276,284,292], yellow: [20,28,36,44,52,60,68,76,82,84,90,92,98,100,106,108,114,116,122,124,130,132,138,140,146,154,162,170,178,186,194,202,210,218,226,234,242,250,258,266,274,282,290] } },
-    { id: 's3d3', num: 3, title: 'Heathens', bpm: 90, difficulty: 'Normal', stars: 3.5, bars: 21, drums: 3, abs: { red: [16,32,48,52,64,68,112,116,120,124,128,132,136,140,144,152,160,168,176,184,192,200,208,216,224,232,240,248,256,264,272,280,288,296,304,312,320], blue: [24,40,56,60,72,76,80,84,88,92,96,100,104,108,148,156,164,172,180,188,196,204,212,220,228,236,244,252,260,268,276,284,292,300,308,316], yellow: [20,28,36,44,50,58,66,74,82,90,98,106,114,122,130,138,146,154,162,170,178,186,194,202,210,218,226,234,242,250,258,266,274,282,290,298,306,314,320] } },
-    { id: 's3d4', num: 4, title: 'Style', bpm: 95, difficulty: 'Hard', stars: 4.5, bars: 26, drums: 3, abs: { red: [16,32,48,52,56,60,64,68,72,76,80,88,96,104,112,120,128,136,144,152,160,168,176,184,192,200,208,216,224,232,240,248,256,264,272,280,288,296,304,312,320,328,336,344,352,360,368,376,384,392,400], blue: [24,40,84,92,100,108,116,124,132,140,148,156,164,172,180,188,196,204,212,220,228,236,244,252,260,268,276,284,292,300,308,316,324,332,340,348,356,364,372,380,388,396], yellow: [20,28,36,44,50,58,66,74,82,90,98,106,114,122,130,138,146,150,154,158,162,166,170,174,178,182,186,190,194,198,202,206,210,214,218,222,226,230,234,238,242,246,250,254,258,262,266,270,274,278,282,286,290,294,298,302,306,310,314,318,322,326,330,334,338,342,346,350,354,358,362,366,370,374,378,382,386,390,394,398,400] } },
-    { id: 's3d5', num: 5, title: 'Adore You', bpm: 99, difficulty: 'Hard', stars: 4.5, bars: 23, drums: 3, abs: { red: [16,32,48,56,64,72,80,88,96,104,112,120,128,136,144,152,160,168,176,184,192,200,208,216,224,232,240,248,256,264,272,280,288,296,304,312,320,328,336], blue: [24,40,52,60,68,76,84,92,100,108,116,124,132,140,148,156,164,172,180,188,196,204,212,220,228,236,244,252,260,268,276,284,292,300,308,316,324,332], yellow: [80,88,96,104,112,120,128,136,144,146,152,154,160,162,168,170,176,178,184,186,192,194,200,202,208,210,216,218,224,226,232,234,240,242,248,250,256,258,264,266,272,274,280,282,288,290,296,298,304,306,312,314,320,322,328,330,336] } },
-    { id: 's3d6', num: 6, title: 'Sunflower', bpm: 90, difficulty: 'Hard', stars: 4.5, bars: 23, drums: 3, abs: { red: [16,24,32,40,48,56,64,72,80,88,96,104,112,120,128,136,144,152,160,168,176,184,192,200,208,216,224,232,240,248,256,264,272,280,288,296,304,312,320,328,336], blue: [20,28,36,44,52,60,68,76,84,92,100,108,116,124,132,140,148,156,164,172,180,188,196,204,212,220,228,236,244,252,260,268,276,284,292,300,308,316,324,332], yellow: [80,88,96,104,112,120,128,136,144,146,152,154,160,162,168,170,176,178,184,186,192,194,200,202,208,210,212,216,218,220,224,226,228,232,234,236,240,242,244,248,250,252,256,258,260,264,266,268,272,274,276,280,282,284,288,290,292,296,298,300,304,306,308,312,314,316,320,322,324,328,330,332,336] } },
-    { id: 's3d7', num: 7, title: 'Breakeven', bpm: 94, difficulty: 'Hard', stars: 6.5, bars: 27, drums: 3, abs: { red: [16,24,32,40,48,56,64,72,80,88,96,104,112,120,128,136,144,152,160,168,176,184,192,200,208,216,224,232,240,248,256,264,272,280,288,296,304,312,320,328,336,344,352,360,368,376,384,392,400], blue: [20,28,36,44,52,60,68,76,84,92,100,108,116,124,132,140,148,156,164,172,180,188,196,204,212,220,228,236,244,252,260,268,276,284,292,300,308,316,324,332,340,348,356,364,372,380,388,396], yellow: [16,24,32,40,48,56,64,72,80,82,88,90,96,98,104,106,112,114,116,120,122,124,128,130,132,136,138,140,144,146,148,150,152,154,156,160,162,164,166,168,170,172,176,178,180,182,184,186,188,192,194,196,198,200,202,204,208,210,212,214,216,218,220,222,224,226,228,230,232,234,236,238,240,242,244,246,248,250,252,254,256,258,260,262,264,266,268,270,272,274,276,278,280,282,284,286,288,290,292,294,296,298,300,302,304,306,308,310,312,314,316,318,320,322,324,326,328,330,332,334,336,338,340,342,344,346,348,350,352,354,356,358,360,362,364,366,368,370,372,374,376,378,380,382,384,386,388,390,392,394,396,398,400] } },
-    { id: 's3d8', num: 8, title: 'I Want It That Way', bpm: 99, difficulty: 'Hard', stars: 7, bars: 28, drums: 3, abs: { red: [16,24,32,40,48,56,64,72,80,82,88,90,96,98,104,106,112,114,120,122,128,130,136,138,144,146,152,154,160,162,168,170,176,178,184,186,192,194,200,202,208,210,216,218,224,226,232,234,240,242,248,250,256,258,264,266,272,274,280,282,288,290,296,298,304,306,312,314,320,322,328,330,336,338,344,346,352,354,360,362,368,370,376,378,384,386,392,394,400], blue: [20,28,36,44,52,60,68,76,84,92,100,108,116,124,132,140,148,156,164,172,180,188,196,204,212,220,228,236,244,252,260,268,276,284,292,300,308,316,324,332,340,348,356,364,372,380,388,396], yellow: [16,24,32,40,48,56,64,72,80,88,96,104,112,120,128,136,144,146,148,152,154,156,160,162,164,168,170,172,176,178,180,184,186,188,192,194,196,200,202,204,208,210,212,214,216,218,220,224,226,228,230,232,234,236,240,242,244,246,248,250,252,256,258,260,262,264,266,268,272,274,276,278,280,282,284,286,288,290,292,294,296,298,300,302,304,306,308,310,312,314,316,318,320,322,324,326,328,330,332,334,336,338,340,342,344,346,348,350,352,354,356,358,360,362,364,366,368,370,372,374,376,378,380,382,384,386,388,390,392,394,396,398,400] } },
-    { id: 's3d9', num: 9, title: 'Rolling In The Deep', bpm: 105, difficulty: 'Hard', stars: 8.5, bars: 34, drums: 3, abs: { red: [16,24,32,40,48,56,64,72,80,82,88,90,96,98,104,106,112,114,120,122,128,130,136,138,144,146,152,154,160,162,168,170,176,178,184,186,192,194,200,202,208,210,216,218,224,226,232,234,240,242,248,250,256,258,264,266,272,274,280,282,288,290,296,298,304,306,312,314,320,322,328,330,336,338,344,346,352,354,360,362,368,370,376,378,384,386,392,394,400,402,408,410,416,418,424,426,432,434,440,442,448,450,456,458,464,466,472,474,480,482,488,490,496,498,504,506,512,514,520,522,528], blue: [20,28,36,44,52,60,68,76,84,92,100,108,116,124,132,140,148,156,164,172,180,188,196,204,212,220,228,236,244,252,260,268,276,284,292,300,308,316,324,332,340,348,356,364,372,380,388,396,404,412,420,428,436,444,452,460,468,476,484,492,500,508,516,524], yellow: [16,24,32,40,48,56,64,72,80,88,96,104,112,120,128,136,144,146,148,152,154,156,160,162,164,168,170,172,176,178,180,184,186,188,192,194,196,200,202,204,208,210,212,214,216,218,220,224,226,228,230,232,234,236,240,242,244,246,248,250,252,256,258,260,262,264,266,268,272,274,276,278,280,282,284,286,288,290,292,294,296,298,300,302,304,306,308,310,312,314,316,318,320,322,324,326,328,330,332,334,336,338,340,342,344,346,348,350,352,354,356,358,360,362,364,366,368,370,372,374,376,378,380,382,384,386,388,390,392,394,396,398,400,402,404,406,408,410,412,414,416,418,420,422,424,426,428,430,432,434,436,438,440,442,444,446,448,450,452,454,456,458,460,462,464,466,468,470,472,474,476,478,480,482,484,486,488,490,492,494,496,498,500,502,504,506,508,510,512,514,516,518,520,522,524,526,528] } },
-    { id: 's3d10', num: 10, title: 'back to friends', bpm: 93, difficulty: 'Hard', stars: 7, bars: 23, drums: 3, abs: { red: [16,24,32,40,48,56,64,72,80,88,90,96,104,106,112,120,122,128,136,138,144,152,154,160,168,170,176,184,186,192,200,202,208,216,218,224,232,234,240,248,250,256,264,266,272,280,282,288,296,298,304,312,314,320,328,330,336,344,346,352,360,362], blue: [20,28,36,44,52,60,68,76,84,92,100,108,116,124,132,140,148,156,164,172,180,188,196,204,212,220,228,236,244,252,260,268,276,284,292,300,308,316,324,332,340,348,356,364], yellow: [16,24,32,40,48,56,64,72,80,82,84,88,90,92,96,98,100,104,106,108,112,114,116,120,122,124,128,130,132,136,138,140,144,146,148,150,152,154,156,160,162,164,166,168,170,172,176,178,180,182,184,186,188,192,194,196,198,200,202,204,208,210,212,214,216,218,220,222,224,226,228,230,232,234,236,238,240,242,244,246,248,250,252,254,256,258,260,262,264,266,268,270,272,274,276,278,280,282,284,286,288,290,292,294,296,298,300,302,304,306,308,310,312,314,316,318,320,322,324,326,328,330,332,334,336,338,340,342,344,346,348,350,352,354,356,358,360,362,364,366] } },
-    { id: 's3d11', num: 11, title: 'Circles', bpm: 120, difficulty: 'Hard', stars: 9, bars: 26, drums: 3, abs: { red: [16,24,32,40,48,56,64,72,80,88,90,96,104,106,112,120,122,128,136,138,144,152,154,160,168,170,176,184,186,192,200,202,208,210,216,218,224,226,232,234,240,242,248,250,256,258,264,266,272,274,280,282,288,290,296,298,304,306,312,314,320,322,328,330,336,338,344,346,352,354,360,362,376,378,384,386,392,394,400], blue: [20,28,36,44,52,60,68,76,84,92,100,108,116,124,132,140,148,156,164,172,180,188,196,204,212,220,228,236,244,252,260,268,276,284,292,300,308,316,324,332,340,348,356,364,372,380,388,396], yellow: [16,24,32,40,48,56,64,72,80,82,84,88,90,92,96,98,100,104,106,108,112,114,116,120,122,124,128,130,132,136,138,140,144,146,148,150,152,154,156,160,162,164,166,168,170,172,176,178,180,182,184,186,188,192,194,196,198,200,202,204,208,210,212,214,216,218,220,222,224,226,228,230,232,234,236,238,240,242,244,246,248,250,252,254,256,258,260,262,264,266,268,270,272,274,276,278,280,282,284,286,288,290,292,294,296,298,300,302,304,306,308,310,312,314,316,318,320,322,324,326,328,330,332,334,336,338,340,342,344,346,348,350,352,354,356,358,360,362,364,366,372,374,376,378,380,382,384,386,388,390,392,394,396,398,400] } },
-    { id: 's3d12', num: 12, title: "Why'd You Only Call Me When You're High", bpm: 92, difficulty: 'Hard', stars: 6, bars: 22, drums: 3, abs: { red: [16,24,32,40,48,54,56,64,70,72,80,86,88,96,102,104,112,118,120,128,134,136,144,150,152,160,166,168,176,182,184,192,198,200,208,214,216,224,230,232,240,246,248,256,262,264,272,278,280,288,294,296,304,310,312,320], blue: [20,28,36,44,52,60,68,76,84,92,100,108,116,124,132,140,148,156,164,172,180,188,196,204,212,220,228,236,244,252,260,268,276,284,292,300,308,316], yellow: [16,24,32,40,48,56,64,72,80,84,88,92,96,100,104,108,112,116,120,124,128,132,136,140,144,146,148,150,152,154,156,160,162,164,166,168,170,172,176,178,180,182,184,186,188,192,194,196,198,200,202,204,208,210,212,214,216,218,220,222,224,226,228,230,232,234,236,238,240,242,244,246,248,250,252,254,256,258,260,262,264,266,268,270,272,274,276,278,280,282,284,286,288,290,292,294,296,298,300,302,304,306,308,310,312,314,316,318,320] } },
-    { id: 's3d13', num: 13, title: 'This Love', bpm: 95, difficulty: 'Hard', stars: 6.5, bars: 31, drums: 3, abs: { red: [16,24,32,40,48,56,64,72,80,86,88,96,102,104,112,118,120,128,134,136,144,150,152,160,166,168,176,182,184,192,198,200,208,214,216,224,230,232,240,246,248,256,262,264,272,278,280,288,294,296,304,310,312,320,326,328,336,342,344,352,358,360,368,374,376,384,390,392,400,406,408,416,422,424,432,438,440,448,454,456,464], blue: [20,28,36,44,52,60,68,76,84,92,100,108,116,124,132,140,148,156,164,172,180,188,196,204,212,220,228,236,244,252,260,268,276,284,292,300,308,316,324,332,340,348,356,364,372,380,388,396,404,412,420,428,436,444,452,460], yellow: [16,24,32,40,48,56,64,72,80,88,96,104,112,120,128,136,144,148,152,156,160,164,168,172,176,180,184,188,192,196,200,204,208,210,212,214,216,218,220,224,226,228,230,232,234,236,240,242,244,246,248,250,252,256,258,260,262,264,266,268,272,274,276,278,280,282,284,286,288,290,292,294,296,298,300,302,304,306,308,310,312,314,316,318,320,322,324,326,328,330,332,334,336,338,340,342,344,346,348,350,352,354,356,358,360,362,364,366,368,370,372,374,376,378,380,382,384,386,388,390,392,394,396,398,400,402,404,406,408,410,412,414,416,418,420,422,424,426,428,430,432,434,436,438,440,442,444,446,448,450,452,454,456,458,460,462,464] } },
-    { id: 's3d14', num: 14, title: 'Adventure of a Lifetime', bpm: 112, difficulty: 'Hard', stars: 7.5, bars: 30, drums: 3, abs: { red: [16,24,32,40,48,56,64,72,80,88,94,96,104,110,112,120,126,128,136,142,144,152,158,160,168,174,176,184,190,192,200,206,208,216,222,224,232,238,240,248,254,256,264,270,272,280,286,288,296,302,304,312,318,320,328,334,336,344,350,352,360,366,368,376,382,384,392,398,400,408,414,416,424,430,432,440,446,448,456,462], blue: [20,28,36,44,52,60,68,76,84,92,100,108,116,124,132,140,148,156,164,172,180,188,196,204,212,220,228,236,244,252,260,268,276,284,292,300,308,316,324,332,340,348,356,364,372,380,388,396,404,412,420,428,436,444,452,460], yellow: [16,24,32,40,48,56,64,72,80,88,96,104,112,120,128,136,144,148,152,156,160,164,168,172,176,180,184,188,192,196,200,204,208,210,212,216,218,220,224,226,228,232,234,236,240,242,244,248,250,252,256,258,260,264,266,268,272,274,276,278,280,282,284,286,288,290,292,294,296,298,300,302,304,306,308,310,312,314,316,318,320,322,324,326,328,330,332,334,336,338,340,342,344,346,348,350,352,354,356,358,360,362,364,366,368,370,372,374,376,378,380,382,384,386,388,390,392,394,396,398,400,402,404,406,408,410,412,414,416,418,420,422,424,426,428,430,432,434,436,438,440,442,444,446,448,450,452,454,456,458,460,462] } },
-    { id: 's3d15', num: 15, title: 'The Less I Know The Better', bpm: 117, difficulty: 'Hard', stars: 9, bars: 30, drums: 3, abs: { red: [16,24,30,32,40,46,48,56,62,64,72,78,80,88,94,96,104,110,112,120,126,128,136,142,144,152,158,160,168,174,176,184,190,192,200,206,208,216,222,224,232,238,240,248,254,256,264,270,272,280,286,288,296,302,304,312,318,320,328,334,336,344,350,352,360,366,368,376,382,384,392,398,400,408,414,416,424,430,432,440,446,448,456,462,464], blue: [20,28,36,44,52,60,68,76,84,92,100,108,116,124,132,140,148,156,164,172,180,188,196,204,212,220,228,236,244,252,260,268,276,284,292,300,308,316,324,332,340,348,356,364,372,380,388,396,404,412,420,428,436,444,452,460], yellow: [16,24,32,40,48,56,64,72,80,84,88,92,96,100,104,108,112,116,120,124,128,132,136,140,144,146,148,152,154,156,160,162,164,168,170,172,176,178,180,184,186,188,192,194,196,200,202,204,208,210,212,214,216,218,220,222,224,226,228,230,232,234,236,238,240,242,244,246,248,250,252,254,256,258,260,262,264,266,268,270,272,274,276,278,280,282,284,286,288,290,292,294,296,298,300,302,304,306,308,310,312,314,316,318,320,322,324,326,328,330,332,334,336,338,340,342,344,346,348,350,352,354,356,358,360,362,364,366,368,370,372,374,376,378,380,382,384,386,388,390,392,394,396,398,400,402,404,406,408,410,412,414,416,418,420,422,424,426,428,430,432,434,436,438,440,442,444,446,448,450,452,454,456,458,460,462,464] } },
+    { id: 's3d2', num: 2, title: 'Thinking Out Loud', artist: 'Ed Sheeran', bpm: 79, difficulty: 'Normal', stars: 3, bars: 20, drums: 3, remote: true },
+    { id: 's3d3', num: 3, title: 'Heathens', artist: 'twenty one pilots', bpm: 90, difficulty: 'Normal', stars: 3.5, bars: 21, drums: 3, remote: true },
+    { id: 's3d4', num: 4, title: 'Style', artist: 'Taylor Swift', bpm: 95, difficulty: 'Hard', stars: 5, bars: 26, drums: 3, remote: true },
+    { id: 's3d5', num: 5, title: 'Adore You', artist: 'Harry Styles', bpm: 99, difficulty: 'Hard', stars: 4.5, bars: 23, drums: 3, remote: true },
+    { id: 's3d6', num: 6, title: 'Sunflower', artist: 'Post Malone, Swae Lee', bpm: 90, difficulty: 'Hard', stars: 4.5, bars: 23, drums: 3, remote: true },
+    { id: 's3d7', num: 7, title: 'Breakeven', artist: 'The Script', bpm: 94, difficulty: 'Hard', stars: 6.5, bars: 27, drums: 3, remote: true },
+    { id: 's3d8', num: 8, title: 'I Want It That Way', artist: 'Backstreet Boys', bpm: 99, difficulty: 'Hard', stars: 7, bars: 28, drums: 3, remote: true },
+    { id: 's3d9', num: 9, title: 'Rolling In The Deep', artist: 'Adele', bpm: 105, difficulty: 'Hard', stars: 8.5, bars: 34, drums: 3, remote: true },
+    { id: 's3d10', num: 10, title: 'back to friends', artist: 'sombr', bpm: 93, difficulty: 'Hard', stars: 7, bars: 23, drums: 3, remote: true },
+    { id: 's3d11', num: 11, title: 'Circles', artist: 'Post Malone', bpm: 120, difficulty: 'Hard', stars: 9, bars: 26, drums: 3, remote: true },
+    { id: 's3d12', num: 12, title: "Why'd You Only Call Me When You're High", artist: 'arctic monkeys', bpm: 92, difficulty: 'Hard', stars: 6.5, bars: 22, drums: 3, remote: true },
+    { id: 's3d13', num: 13, title: 'This Love', artist: 'Maroon 5', bpm: 95, difficulty: 'Hard', stars: 6.5, bars: 31, drums: 3, remote: true },
+    { id: 's3d14', num: 14, title: 'Adventure of a Lifetime', artist: 'Coldplay', bpm: 112, difficulty: 'Hard', stars: 8, bars: 30, drums: 3, remote: true },
+    { id: 's3d15', num: 15, title: 'The Less I Know The Better', artist: 'Tame Impala', bpm: 117, difficulty: 'Hard', stars: 9, bars: 30, drums: 3, remote: true },
   ];
-  currentSong() { return this.SONGS.find(s => s.id === this.state.songId) || this.SONGS[0]; }
+  // FreePlay: danh sách + nốt + nhạc nằm ở docs/freeplay/ (index.json, <id>.json, <id>.ogg), chỉ tải khi cần
+  FREE_BASE = 'freeplay/'; FREE_V = '1';
+  // danh sách bài FreePlay (tên, nghệ sĩ, BPM, sao...) nhúng sẵn từ docs/freeplay/index.json lúc đóng gói, nên hiện ngay không cần mạng
+  freeSongs = (@@FREEPLAY_INDEX@@).songs.map((s) => Object.assign({}, s, { remote: true, free: true }));
+  findSong(id) {
+    return this.SONGS.find(s => s.id === id) || (this.freeSongs || []).find(s => s.id === id);
+  }
+  currentSong() {
+    const s = this.findSong(this.state.songId) || this.SONGS[0];
+    if (s.remote && !s.abs && this.remoteAbs && this.remoteAbs[s.id]) s.abs = this.remoteAbs[s.id]; // nốt đã tải về
+    return s;
+  }
+  // danh sách bài đang hiện: Learn (SONGS, trừ bài chỉ có ở FreePlay) hoặc FreePlay (index.json), theo tab 2/3 trống
+  listFor(main, tab) {
+    return main === 'free'
+      ? (this.freeSongs || []).filter(s => (s.drums || 2) === tab)
+      : this.SONGS.filter(s => !s.freeOnly && (s.drums || 2) === tab);
+  }
+  // tải nốt (.json) + nhạc (.ogg) của một bài FreePlay/remote; trả về Promise
+  ensureRemote(song) {
+    const id = song.id;
+    if (!this.remoteAbs) this.remoteAbs = {};
+    if (!this.musicBufs) this.musicBufs = {};
+    if (!this.remoteOrder) this.remoteOrder = [];
+    const jobs = [];
+    if (!this.remoteAbs[id]) {
+      jobs.push(fetch(this.FREE_BASE + id + '.json?v=' + this.FREE_V).then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        .then((d) => { this.remoteAbs[id] = { red: d.red || [], blue: d.blue || [], yellow: d.yellow || [] }; if (d.bars) song.bars = d.bars; }));
+    }
+    if (!this.musicBufs[id] && this.ac) {
+      jobs.push(fetch(this.FREE_BASE + id + '.ogg?v=' + this.FREE_V).then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.arrayBuffer(); })
+        .then((b) => this.ac.decodeAudioData(b)).then((buf) => { this.musicBufs[id] = buf; }));
+    }
+    return Promise.all(jobs).then(() => {
+      // giữ tối đa 3 bài đã giải mã trong RAM (mỗi bài khoảng 20 MB)
+      this.remoteOrder = this.remoteOrder.filter((x) => x !== id); this.remoteOrder.push(id);
+      while (this.remoteOrder.length > 3) { const old = this.remoteOrder.shift(); delete this.musicBufs[old]; }
+    });
+  }
+  showLoadError(msg) {
+    if (this.errTimer) clearTimeout(this.errTimer);
+    this.setState({ loadError: msg });
+    this.errTimer = setTimeout(() => { this.errTimer = null; this.setState({ loadError: null }); }, 4500);
+  }
   // bài import (có abs): nhạc và level đã đồng bộ sẵn, bắt đầu ngay bar 0 (step 16) nên chỉ có 1 ô nhịp đếm trước; bài thường có thêm ô nhịp mở đầu nữa (bar 1 ở step 32)
   introSteps() { return this.currentSong().abs ? 16 : 32; }
   // độ khó kiểu osu!: 10 ô; sao nguyên = sao to sáng, phần lẻ = 1 sao nhỏ (nhỏ theo phần lẻ), ô còn lại = chấm nhỏ mờ
@@ -101,6 +143,17 @@ class Component extends DCLogic {
     };
   }
 
+  mainTabStyle(k) {
+    const on = this.state.mainTab === k;
+    return {
+      flex: 1, padding: '10px 0', borderRadius: '13px', cursor: 'pointer',
+      border: on ? '2px solid #4bd0ff' : '2px solid rgba(255,255,255,.1)',
+      background: on ? 'linear-gradient(180deg,#4bd0ff,#2a8fd0)' : 'rgba(255,255,255,.04)',
+      color: on ? '#04283a' : '#c9b8a6', fontSize: '15px', fontWeight: 800, letterSpacing: '.5px',
+      boxShadow: on ? '0 4px 0 #175f86' : 'none', transition: 'all .12s'
+    };
+  }
+
   modeStyle(m) {
     const on = this.state.mode === m;
     return {
@@ -113,7 +166,7 @@ class Component extends DCLogic {
   }
 
   state = {
-    playing: false, songId: null, showResult: false, showFail: false, tab: 2, mode: 'play',
+    playing: false, songId: null, showResult: false, showFail: false, tab: 2, mode: 'play', mainTab: 'learn', loadingSongId: null, loadError: null,
     score: 0, combo: 0, best: 0, hits: 0,
     nPerfect: 0, nGreat: 0, nGood: 0, nMiss: 0,
     judge: '', judgeSeq: 0,
@@ -122,7 +175,7 @@ class Component extends DCLogic {
   };
 
   bpm() { return this.currentSong().bpm; }
-  diff() { return this.currentSong().difficulty; }
+  diff() { return this.currentSong().difficulty || ''; }
   windows() {
     // uniform hit windows in milliseconds, converted to 16th-note steps for the current tempo.
     // 1 step = 15000 / bpm ms, so steps = ms * bpm / 15000.
@@ -284,7 +337,7 @@ class Component extends DCLogic {
     const musicStartCount = { s5: 3, s6: 3, s8: 2 };
     // songs whose backing track begins only after the count-in ends (on beat 1 of bar 1)
     const musicStartAtGo = { s7: true };
-    if (/^s3d([2-9]|1[0-5])$/.test(this.state.songId)) musicStartAtGo[this.state.songId] = true; // bài từ file level: nhạc bắt đầu đúng nhịp 1 của ô nhịp 1
+    if (this.currentSong().abs) musicStartAtGo[this.state.songId] = true; // bài từ file level (remote): nhạc bắt đầu ngay bar 0
     const startAtGo = isResume || !!musicStartAtGo[this.state.songId];
     const startAt = musicStartCount[this.state.songId] || 1;
     const beatMs = 60000 / this.bpm(); // one quarter-note beat at the song's BPM
@@ -400,7 +453,18 @@ class Component extends DCLogic {
   // pick a song from the list, arm it, then wait for the player to tap D/F (or a drum) to start
   selectSong(id) {
     this.ensureAudio();
-    this.loadLazyTrack(id);
+    const sg = this.findSong(id);
+    if (sg && sg.remote && (!this.remoteAbs || !this.remoteAbs[id] || (this.ac && !(this.musicBufs && this.musicBufs[id])))) {
+      if (this.state.loadingSongId) return;
+      this.setState({ loadingSongId: id, loadError: null });
+      this.ensureRemote(sg)
+        .then(() => { this.setState({ loadingSongId: null }); this.startSelect(id); })
+        .catch(() => { this.setState({ loadingSongId: null }); this.showLoadError("Couldn't download this song. Check your connection and try again."); });
+      return;
+    }
+    this.startSelect(id);
+  }
+  startSelect(id) {
     this.armedAt = Date.now();
     if (this.countTimer) clearTimeout(this.countTimer);
     this.setState({ songId: id, showResult: false, showFail: false, armed: true, playing: false, score: 0, combo: 0, best: 0, hits: 0, nPerfect: 0, nGreat: 0, nGood: 0, nMiss: 0, judge: '', countdown: null }, () => {
@@ -564,13 +628,6 @@ class Component extends DCLogic {
           .catch(() => { });
       }
     });
-  }
-  // bài từ file level (s3d2..s3d15): chỉ nạp + giải mã nhạc khi bài được chọn, để không tốn RAM cho cả 14 bài
-  loadLazyTrack(id) {
-    const files = this.LAZY_TRACKS;
-    if (!id || !files[id] || !this.ac || this.musicBufs[id] || this.musicLoading[id]) return;
-    this.musicLoading[id] = true;
-    fetch(files[id]).then((r) => r.arrayBuffer()).then((b) => this.ac.decodeAudioData(b)).then((buf) => { this.musicBufs[id] = buf; }).catch(() => { this.musicLoading[id] = false; });
   }
   // backing track for the current song. Starts on the count-in.
   // offset (seconds) resumes mid-track; defaults to the beginning.
@@ -1101,8 +1158,9 @@ class Component extends DCLogic {
     const nPerfectShown = ci(nPerfect), nGreatShown = ci(nGreat), nGoodShown = ci(nGood), nMissShown = ci(nMiss);
     const bestShown = ci(this.state.best), hitsShown = ci(this.state.hits);
     // next level available if score > 900 and there's a higher level
-    const curIdx = this.SONGS.findIndex(s => s.id === this.state.songId);
-    const hasNext = curIdx >= 0 && curIdx < this.SONGS.length - 1;
+    const pool = this.state.mainTab === 'free' ? this.freeSongs : this.SONGS;
+    const curIdx = pool.findIndex(s => s.id === this.state.songId);
+    const hasNext = curIdx >= 0 && curIdx < pool.length - 1 && (this.state.mainTab !== 'free' || (pool[curIdx + 1].drums || 2) === (pool[curIdx].drums || 2));
     const showNext = roundedScore > 800 && hasNext;
 
     return {
@@ -1133,21 +1191,24 @@ class Component extends DCLogic {
       hits: this.state.hits, total: notes.length,
       hitsShown, bestShown, nPerfectShown, nGreatShown, nGoodShown, nMissShown,
       starsEls, nPerfect, nGreat, nGood, nMiss, showNext,
-      nextLevel: () => { this.playMenuClick(); this.stopRainbowSfx(); if (hasNext) this.selectSong(this.SONGS[curIdx + 1].id); },
+      nextLevel: () => { this.playMenuClick(); this.stopRainbowSfx(); if (hasNext) this.selectSong(pool[curIdx + 1].id); },
       showCombo: this.state.combo >= 2,
       comboEl: React.createElement('div', { key: 'cb' + this.state.combo, style: { fontSize: '38px', lineHeight: 1, fontWeight: 700, color: '#ffcc33', textShadow: '0 3px 0 #a24a08, 0 0 22px rgba(255,150,40,.55)', animation: 'comboBump .26s ease-out' } }, this.state.combo),
       showFaces,
       bpm: this.bpm(), diffLabel: this.diff().toUpperCase(), bar: bar < 0 ? '--' : bar, totalBars,
       songTitle: song.title,
-      songs: this.SONGS.filter(s => (s.drums || 2) === this.state.tab).map((s, idx) => {
+      songs: this.listFor(this.state.mainTab, this.state.tab).map((s, idx) => {
+        const isFree = this.state.mainTab === 'free';
         const prog = this.getProgress()[s.id] || {};
         // Learn mở khoá khi đạt từ 2 sao ở Play; 3 bài đầu của mỗi chế độ (tab) luôn mở
         const learnOpen = idx < 3 || (prog.play || 0) >= 2;
-        const done = (prog.learn || 0) >= 3; // hoàn thành Learn với 3 sao
+        const done = !isFree && (prog.learn || 0) >= 3; // hoàn thành Learn với 3 sao
         const R = React.createElement;
         return {
-        id: s.id, num: s.num, title: s.title, bpm: s.bpm,
-        diffLabel: s.difficulty.toUpperCase(),
+        id: s.id, num: isFree ? idx + 1 : s.num, title: s.title, bpm: s.bpm,
+        subLine: (s.artist ? s.artist + ' · ' : '') + s.bpm + ' BPM',
+        showLearn: !isFree,
+        diffLabel: (s.difficulty || '').toUpperCase(),
         starEls: this.starsEl(s.stars),
         play: () => { this.playMenuClick(); this.selectSong(s.id); },
         playPlay: () => { this.playMenuClick(); this.setState({ mode: 'play' }); this.selectSong(s.id); },
@@ -1182,11 +1243,18 @@ class Component extends DCLogic {
           ? R('svg', { width: 26, height: 26, viewBox: '0 0 24 24', style: { display: 'block' } },
             R('path', { d: 'M4.5 12.8 L9.6 17.8 L19.5 6.5', fill: 'none', stroke: '#0b4a2a', strokeWidth: 5.2, strokeLinecap: 'round', strokeLinejoin: 'round' }),
             R('path', { d: 'M4.5 12.8 L9.6 17.8 L19.5 6.5', fill: 'none', stroke: '#3ddc84', strokeWidth: 3.2, strokeLinecap: 'round', strokeLinejoin: 'round' }))
-          : String(s.num)
+          : String(isFree ? idx + 1 : s.num)
         };
       }),
       tab: this.state.tab,
-      emptyTab: this.SONGS.filter(s => (s.drums || 2) === this.state.tab).length === 0,
+      emptyTab: false,
+      listMessage: this.listFor(this.state.mainTab, this.state.tab).length === 0 ? 'No songs yet. Coming soon.' : '',
+      learnTabStyle: this.mainTabStyle('learn'), freeTabStyle: this.mainTabStyle('free'),
+      selectLearn: () => { this.playMenuClick(); this.setState({ mainTab: 'learn' }); },
+      selectFree: () => { this.playMenuClick(); this.setState({ mainTab: 'free' }); },
+      songLoading: this.state.loadingSongId != null,
+      loadingTitle: (() => { const s = this.state.loadingSongId ? this.findSong(this.state.loadingSongId) : null; return s ? s.title : ''; })(),
+      loadError: this.state.loadError || '', showLoadError: !!this.state.loadError,
       tab2Style: this.tabStyle(2), tab3Style: this.tabStyle(3),
       playModeStyle: this.modeStyle('play'), learnModeStyle: this.modeStyle('learn'),
       selectPlayMode: () => { this.playMenuClick(); this.setState({ mode: 'play' }); },

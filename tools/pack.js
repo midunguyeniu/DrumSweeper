@@ -12,7 +12,11 @@ const srcDir = path.resolve(opts.src || path.join(root, 'src'));
 const outPath = path.resolve(opts.out || path.join(root, 'docs', 'index.html'));
 
 const read = (f) => fs.readFileSync(path.join(srcDir, f), 'utf8');
-const game = read('game.js'), tpl = read('template.html'), frame = read('frame.html');
+// Danh sách bài FreePlay nhúng sẵn: @@FREEPLAY_INDEX@@ trong game.js -> nội dung docs/freeplay/index.json
+const idxPath = path.join(root, 'docs', 'freeplay', 'index.json');
+const freeIndex = fs.existsSync(idxPath) ? fs.readFileSync(idxPath, 'utf8') : '{"songs":[]}';
+JSON.parse(freeIndex);
+const game = read('game.js').split('@@FREEPLAY_INDEX@@').join(freeIndex), tpl = read('template.html'), frame = read('frame.html');
 
 // Kiểm tra trước khi đóng gói
 try { new vm.Script(game, { filename: 'game.js' }); }
@@ -22,7 +26,7 @@ for (const [mark, text, file] of [[DC_MARK, tpl, 'template.html'], [TEMPLATE_MAR
   if (text.split(mark).length !== 2) { console.error(`${file} phải chứa đúng một ${mark}.`); process.exit(1); }
 
 const missing = [];
-const code = game.replace(ASSET_RE, (m, name) => {
+const code = game.split('@@FREEPLAY_INDEX@@').join(freeIndex).replace(ASSET_RE, (m, name) => {
   const p = path.join(srcDir, 'assets', name);
   const mime = MIME_BY_EXT[path.extname(name).slice(1).toLowerCase()];
   if (!fs.existsSync(p) || !mime) { missing.push(name); return m; }
