@@ -36,7 +36,7 @@ const icon = fs.existsSync(iconPath)
   ? 'data:image/svg+xml,' + encodeURIComponent(fs.readFileSync(iconPath, 'utf8').replace(/>\s+</g, '><').trim())
   : '';
 const template = tpl.replace(DC_MARK, () => code).split('@@ICON@@').join(icon);
-const out = frame.replace(TEMPLATE_MARK, () => encodeTemplate(template));
+const out = frame.split('@@ICON@@').join(icon).replace(TEMPLATE_MARK, () => encodeTemplate(template));
 
 fs.mkdirSync(path.dirname(outPath), { recursive: true });
 fs.writeFileSync(outPath, out);

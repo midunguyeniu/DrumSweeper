@@ -36,7 +36,8 @@ Nội dung `src/`:
 - `game.js`: logic game (class `Component`, ~56 KB). **Sửa ở đây.**
 - `template.html`: HTML/CSS bao quanh, chứa `@@DC_SCRIPT@@` là chỗ gắn `game.js`.
 - `assets/`: nhạc (`track-<id bài>.ogg`, `menu-click.ogg`), tiếng trống (`red-kick.wav`, `blue-drum.wav`, `bar-click*.wav`, `rainbow.wav`), ảnh (`red/blue/yellow-drum.png`, `note-*.png`). Trong `game.js` chúng hiện là `@@ASSET:tên-file@@`. **Thay nhạc/ảnh bằng cách ghi đè file cùng tên** (giữ đúng đuôi `.ogg`/`.wav`/`.png`); thêm file mới thì viết `@@ASSET:tên@@` đúng chỗ trong `game.js`.
-- `frame.html`: vỏ bundle (font, React, bộ giải nén), chứa `@@TEMPLATE@@`. Không sửa.
+- `frame.html`: vỏ bundle (font, React, bộ giải nén), chứa `@@TEMPLATE@@`. Không sửa phần bộ giải nén và manifest. Phần màn hình chờ (logo + tên game + thanh loading, mốc % set bằng `setProgress`) cũng nằm ở đây và là chỗ sửa được; màn chờ được giữ lại sau khi game thay trang, tự tắt sau khi game vẽ xong (chốt chặn 6 giây).
+- `icon.svg`: icon game. `pack.js` nhúng nó vào chỗ `@@ICON@@` trong `frame.html` (logo màn chờ) và `template.html` (biểu tượng tab).
 
 Đã kiểm chứng (2026-11-13): unpack rồi pack ra file **giống từng byte** với bản gốc; sửa thử một tên bài trong `game.js`, đóng gói, mở trong trình duyệt thì tên mới hiện đúng, không lỗi console. Chưa kiểm chứng: đồng bộ nhạc sau khi đổi file nhạc, và chơi trọn một bài sau khi sửa logic.
 
