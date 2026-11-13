@@ -141,6 +141,14 @@ class Component extends DCLogic {
     this.keyUpHandler = (e) => { if (e.code === 'Space' || e.key === ' ') e.preventDefault(); };
     window.addEventListener('keydown', this.keyHandler);
     window.addEventListener('keyup', this.keyUpHandler);
+    // No page drag while a song screen is open (iOS rubber-band, Android pull-to-refresh). Must be non-passive.
+    this.touchMoveHandler = (e) => { if (this.state.songId != null && e.cancelable) e.preventDefault(); };
+    document.addEventListener('touchmove', this.touchMoveHandler, { passive: false });
+    this.wheelHandler = (e) => { if (this.state.songId != null) e.preventDefault(); };
+    document.addEventListener('wheel', this.wheelHandler, { passive: false });
+    // never let a drag chain out of the page (the song list still scrolls inside its own box)
+    document.documentElement.style.overscrollBehavior = 'none';
+    document.body.style.overscrollBehavior = 'none';
     // a mouse click / tap anywhere also counts as "tap to start" while armed
     this.pointerHandler = (e) => {
       if (!this.state.armed) return;
@@ -197,6 +205,8 @@ class Component extends DCLogic {
     if (this.countTimer) clearTimeout(this.countTimer);
     window.removeEventListener('keydown', this.keyHandler);
     window.removeEventListener('keyup', this.keyUpHandler);
+    document.removeEventListener('touchmove', this.touchMoveHandler);
+    document.removeEventListener('wheel', this.wheelHandler);
     window.removeEventListener('pointerdown', this.pointerHandler);
     window.removeEventListener('pointerdown', this.drumHandler);
     window.removeEventListener('resize', this.onResize);
@@ -257,7 +267,19 @@ class Component extends DCLogic {
     g.gain.exponentialRampToValueAtTime(0.0001, t + (n === 0 ? 0.3 : 0.18));
     o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + 0.35);
   }
-  componentDidUpdate(prev) { this.measureStave(); }
+  componentDidUpdate(prev) { this.measureStave(); this.syncScrollLock(); }
+  // While a song screen is open (playing, paused, result) lock every page gesture: scroll, rubber-band bounce,
+  // pull-to-refresh and pinch zoom. The song list screen keeps its own normal scrolling.
+  syncScrollLock() {
+    const want = this.state.songId != null;
+    if (want === !!this.scrollLocked) return;
+    this.scrollLocked = want;
+    const de = document.documentElement, b = document.body;
+    if (!de || !b) return;
+    de.style.touchAction = want ? 'none' : '';
+    de.style.overflow = want ? 'hidden' : '';
+    b.style.overflow = want ? 'hidden' : '';
+  }
   // The stave window is 3 rows (STAVE_FULL_H px) but flex-shrinks on short phone screens so the drums stay
   // on-screen. Instead of cutting off the 3rd row, scale the whole strip down to fit the height we got.
   measureStave() {
