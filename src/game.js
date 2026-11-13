@@ -903,7 +903,7 @@ class Component extends DCLogic {
     const blueStyle = {
       ...drumImgBase, ...big2,
       ...(drums3 ? {} : { marginLeft: 'min(0px, calc(50% - ' + DRUM2_D + '))' }),
-      backgroundImage: 'url(@@ASSET:blue-drum.png@@)',
+      backgroundImage: 'url(@@ASSET:blue-drum.webp@@)',
       filter: blueDisabled ? 'grayscale(1) brightness(.55) opacity(.6)' : (bluePressed ? 'drop-shadow(0 0 26px rgba(41,197,230,.85)) brightness(1.12)' : 'drop-shadow(0 10px 16px rgba(0,0,0,.45))'),
       transform: (!blueDisabled && bluePressed) ? PRESS : REST,
       pointerEvents: blueDisabled ? 'none' : 'auto', cursor: blueDisabled ? 'default' : 'pointer'
@@ -911,14 +911,14 @@ class Component extends DCLogic {
     const redStyle = {
       ...drumImgBase, ...big2,
       ...(drums3 ? {} : { marginRight: 'min(0px, calc(50% - ' + DRUM2_D + '))' }),
-      backgroundImage: 'url(@@ASSET:red-drum.png@@)',
+      backgroundImage: 'url(@@ASSET:red-drum.webp@@)',
       filter: redPressed ? 'drop-shadow(0 0 26px rgba(255,90,50,.85)) brightness(1.12)' : 'drop-shadow(0 10px 16px rgba(0,0,0,.45))',
       transform: redPressed ? PRESS : REST
     };
     const yellowPressed = now - this.state.flashYellow < 110;
     const yellowStyle = {
       ...drumImgBase,
-      backgroundImage: 'url(@@ASSET:yellow-drum.png@@)',
+      backgroundImage: 'url(@@ASSET:yellow-drum.webp@@)',
       filter: yellowPressed ? 'drop-shadow(0 0 26px rgba(255,200,40,.9)) brightness(1.12)' : 'drop-shadow(0 10px 16px rgba(0,0,0,.45))',
       transform: yellowPressed ? PRESS : REST
     };
@@ -1046,14 +1046,16 @@ class Component extends DCLogic {
         const k = (c, t) => R('b', { style: { color: c } }, t);
         return this.state.tab === 3
           ? R(React.Fragment, null, 'keys ', k('#29c5e6', 'F'), ' = blue · ', k('#ff6a5a', 'Space'), ' = red · ', k('#ffcc33', 'J'), ' = yellow')
-          : R(React.Fragment, null, 'keys ', k('#29c5e6', 'F'), ' = blue (La) · ', k('#ff6a5a', 'Space'), ' = red (Fa)');
+          : R(React.Fragment, null, 'keys ', k('#29c5e6', 'F'), ' = blue · ', k('#ff6a5a', 'Space'), ' = red');
       })(),
       score: roundedScore, resultScore: (this.state.scoreShown ?? roundedScore), accuracy, combo: this.state.combo, best: this.state.best,
       hits: this.state.hits, total: notes.length,
       hitsShown, bestShown, nPerfectShown, nGreatShown, nGoodShown, nMissShown,
       starsEls, nPerfect, nGreat, nGood, nMiss, showNext,
       nextLevel: () => { this.playMenuClick(); this.stopRainbowSfx(); if (hasNext) this.selectSong(this.SONGS[curIdx + 1].id); },
-      showCombo: this.state.combo >= 2, showFaces,
+      showCombo: this.state.combo >= 2,
+      comboEl: React.createElement('div', { key: 'cb' + this.state.combo, style: { fontSize: '38px', lineHeight: 1, fontWeight: 700, color: '#ffcc33', textShadow: '0 3px 0 #a24a08, 0 0 22px rgba(255,150,40,.55)', animation: 'comboBump .26s ease-out' } }, this.state.combo),
+      showFaces,
       bpm: this.bpm(), diffLabel: this.diff().toUpperCase(), bar: bar < 0 ? '--' : bar, totalBars,
       songTitle: song.title,
       songs: this.SONGS.filter(s => (s.drums || 2) === this.state.tab).map(s => ({
