@@ -126,14 +126,21 @@ class Component extends DCLogic {
     this.reset(false);
     this.menuClick = new Audio('@@ASSET:menu-click.ogg@@');
     this.menuClick.preload = 'auto';
+    // Keyboard: F = blue (left drum), Space = red (middle/right), J = yellow
     this.keyHandler = (e) => {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      const isSpace = e.code === 'Space' || e.key === ' ';
+      // Space would otherwise scroll the page / re-click the focused button (e.g. Play) on key-up
+      if (isSpace) e.preventDefault();
       if (e.repeat) return;
-      const k = e.key.toLowerCase();
-      if (k === 'd' || k === 'arrowleft') { this.hit('blue'); }
-      if (k === 'f' || k === 'arrowright') { this.hit('red'); }
-      if (k === 'g' || k === 'arrowup') { this.hit('yellow'); }
+      const k = (e.key || '').toLowerCase();
+      if (k === 'f') { this.hit('blue'); }
+      else if (isSpace) { this.hit('red'); }
+      else if (k === 'j') { this.hit('yellow'); }
     };
+    this.keyUpHandler = (e) => { if (e.code === 'Space' || e.key === ' ') e.preventDefault(); };
     window.addEventListener('keydown', this.keyHandler);
+    window.addEventListener('keyup', this.keyUpHandler);
     // a mouse click / tap anywhere also counts as "tap to start" while armed
     this.pointerHandler = (e) => {
       if (!this.state.armed) return;
@@ -154,6 +161,9 @@ class Component extends DCLogic {
       this.hit(el.getAttribute('data-drum'));
     };
     window.addEventListener('pointerdown', this.drumHandler);
+    // screen height changes (rotation, Safari toolbar showing/hiding) -> re-fit the stave
+    this.onResize = () => this.measureStave();
+    window.addEventListener('resize', this.onResize);
     this.raf = requestAnimationFrame((t) => this.tick(t));
   }
   playBarClick() {
@@ -176,8 +186,10 @@ class Component extends DCLogic {
     cancelAnimationFrame(this.raf);
     if (this.countTimer) clearTimeout(this.countTimer);
     window.removeEventListener('keydown', this.keyHandler);
+    window.removeEventListener('keyup', this.keyUpHandler);
     window.removeEventListener('pointerdown', this.pointerHandler);
     window.removeEventListener('pointerdown', this.drumHandler);
+    window.removeEventListener('resize', this.onResize);
   }
 
   // 3-2-1 count-in synced to the song tempo (one count per beat), then start.
@@ -235,7 +247,15 @@ class Component extends DCLogic {
     g.gain.exponentialRampToValueAtTime(0.0001, t + (n === 0 ? 0.3 : 0.18));
     o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + 0.35);
   }
-  componentDidUpdate(prev) { }
+  componentDidUpdate(prev) { this.measureStave(); }
+  // The stave window is 3 rows (STAVE_FULL_H px) but flex-shrinks on short phone screens so the drums stay
+  // on-screen. Instead of cutting off the 3rd row, scale the whole strip down to fit the height we got.
+  measureStave() {
+    const el = document.querySelector('[data-stave-viewport]');
+    if (!el || !el.clientHeight) return;
+    const k = Math.max(0.5, Math.min(1, el.clientHeight / this.STAVE_FULL_H));
+    if (Math.abs(k - (this.stripScale || 1)) > 0.004) { this.stripScale = k; this.forceUpdate(); }
+  }
 
   // staggered star reveal (0.4s each) with a rising chime; the score counts up in lockstep,
   // finishing exactly when the last star lands.
@@ -799,6 +819,8 @@ class Component extends DCLogic {
     // On the final rows the strip stops scrolling (capped), so the last bar is played in the bottom
     // slot with no further transition.
     const viewportH = Math.round(ROWH * 8 / 3 + 2 * ROWGAP);
+    this.STAVE_FULL_H = viewportH;
+    const k = this.stripScale || 1; // <1 on short screens: strip is scaled down so all 3 rows fit (see measureStave)
     const maxScrollY = Math.max(0, maxSeg * STRIDE + ROWH - viewportH);
     const scrollY = Math.min(curSeg === 0 ? 0 : (curSeg - 1) * STRIDE + Math.round(ROWH / 3), maxScrollY);
     // viewport flex-shrinks on short screens (so the drums always stay on-screen & tappable), but never
@@ -807,7 +829,8 @@ class Component extends DCLogic {
     const stripStyle = {
       position: 'relative', left: 0, right: 0, top: 0,
       display: 'flex', flexDirection: 'column', gap: ROWGAP + 'px',
-      transform: 'translateY(' + (-scrollY) + 'px)',
+      width: (100 / k) + '%', transformOrigin: 'top left',
+      transform: 'scale(' + k + ') translateY(' + (-scrollY) + 'px)',
       transition: 'transform .7s cubic-bezier(.4,0,.2,1)'
     };
 
@@ -943,14 +966,14 @@ class Component extends DCLogic {
       showBlueKey: !blueDisabled,
       keycapRowStyle: blueDisabled
         ? { display: 'flex', width: '100%', justifyContent: 'flex-end', paddingRight: '18%', alignItems: 'flex-end', boxSizing: 'border-box' }
-        : { display: 'flex', gap: '88px', alignItems: 'flex-end' },
+        : { display: 'flex', gap: drums3 ? '43px' : '88px', alignItems: 'flex-end' },
       showLearnIntro: this.state.armed && this.state.mode === 'learn',
       keyHint: (() => {
         const R = React.createElement;
         const k = (c, t) => R('b', { style: { color: c } }, t);
         return this.state.tab === 3
-          ? R(React.Fragment, null, 'keys ', k('#29c5e6', 'D'), ' = blue · ', k('#ff6a5a', 'F'), ' = red · ', k('#ffcc33', 'G'), ' = yellow')
-          : R(React.Fragment, null, 'keys ', k('#29c5e6', 'D'), ' = blue (La) · ', k('#ff6a5a', 'F'), ' = red (Fa)');
+          ? R(React.Fragment, null, 'keys ', k('#29c5e6', 'F'), ' = blue · ', k('#ff6a5a', 'Space'), ' = red · ', k('#ffcc33', 'J'), ' = yellow')
+          : R(React.Fragment, null, 'keys ', k('#29c5e6', 'F'), ' = blue (La) · ', k('#ff6a5a', 'Space'), ' = red (Fa)');
       })(),
       score: roundedScore, resultScore: (this.state.scoreShown ?? roundedScore), accuracy, combo: this.state.combo, best: this.state.best,
       hits: this.state.hits, total: notes.length,

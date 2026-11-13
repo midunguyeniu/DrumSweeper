@@ -12,7 +12,7 @@ Hai file:
 - `DrumStar-Sweep-v2-phone.html` (~19 MB): **file chính, chỗ để sửa.** Là bản gốc tải về từ `storage.googleapis.com/pub-taptune.firebasestorage.app/musicverse-2/lessons/demo/DrumStar-Sweep-v2-phone.html` ngày 2026-11-13. Đã kiểm chứng: phục vụ qua http://127.0.0.1 thì chạy được, không lỗi console, bấm Play ra màn "Tap to Start".
 - `DrumStar-Sweep-v2-phone.saved-snapshot.html` (~25 MB): bản "Save Page As" cũ, **không chạy được** (3 script `blob:` chết, chỉ còn màn danh sách tĩnh). Chỉ giữ để tham khảo/dự phòng, không sửa trên đó.
 
-Chạy thử: khung thiết kế điện thoại 420x910. Phím: `F`/mũi tên phải = trống đỏ, `D`/mũi tên trái = trống xanh, `G`/mũi tên lên = trống vàng. Môi trường máy này: không có Python (dùng Node để phục vụ file), trình duyệt Playwright chặn `file://` nên phải phục vụ qua http, cổng 8765 đang bị app khác chiếm. Chưa kiểm chứng: chấm điểm, nhạc, các bài khác, chế độ Learn, tab 3-Drums.
+Chạy thử: khung thiết kế điện thoại 420x910. Phím (từ 2026-11-13): `F` = trống xanh, `Space` = trống đỏ, `J` = trống vàng; không còn D/G/mũi tên. Phím hiển thị dạng phím bàn phím 3D (class `.keycap` trong `template.html`, vẽ bằng CSS; phím Space là ký hiệu ␣ bằng SVG); khoảng cách hàng phím ở `keycapRowStyle` trong `game.js` (31/43 px cho 3 trống để thẳng hàng với trống). Chữ phím chỉ hiện trên máy có chuột (class `kbd-hint`, ẩn bằng media query `(hover: none) and (pointer: coarse)`), điện thoại/máy tính bảng cảm ứng thì ẩn. Môi trường máy này: không có Python (dùng Node để phục vụ file), trình duyệt Playwright chặn `file://` nên phải phục vụ qua http, cổng 8765 đang bị app khác chiếm. Chưa kiểm chứng: chấm điểm, nhạc, các bài khác, chế độ Learn, tab 3-Drums.
 
 ## Cấu trúc file chính (quan trọng khi sửa)
 
@@ -46,6 +46,10 @@ Không được: sửa `DrumStar-Sweep-v2-phone.html` ở thư mục gốc (đó
 ## Cẩn thận khi thêm sự kiện trong template
 
 Bộ chạy "dc" chỉ gắn các sự kiện trong `EVENT_MAP`: `onclick, onchange, oninput, onsubmit, onkeydown, onkeyup, onkeypress, onmousedown, onmouseup, onmouseenter, onmouseleave, onfocus, onblur, ondoubleclick, oncontextmenu`. Mọi `on...` khác (như `onpointerdown`, `ontouchstart`) **bị bỏ qua âm thầm, không báo lỗi**. Đó là lý do trước đây chạm/nhấp vào trống không ăn (chỉ phím F/D/G chạy), cả ở bản gốc. Đã sửa (2026-11-13): nút trống có `data-drum="blue|red|yellow"` và `game.js` bắt `pointerdown` ở cấp `window` (`this.drumHandler`). Cần sự kiện ngoài danh sách trên thì làm theo cách đó, đừng viết `onpointerdown="{{ ... }}"` trong template. Hàm `tapBlue/tapRed/tapYellow` trong `renderVals()` giờ không còn được gọi.
+
+## Khuông nhạc co theo chiều cao màn hình
+
+Khung khuông nhạc (3 hàng) cao tối đa 442 px nhưng flex co lại trên màn thấp để hai trống luôn hiện. Trước đây việc co này cắt mất hàng thứ 3 (lỗi trên iPhone, 2026-11-13). Đã sửa: `measureStave()` đo chiều cao thật của `[data-stave-viewport]` (sau mỗi lần render và khi `resize`), rồi `stripStyle` thu nhỏ cả dải hàng bằng `scale(k)` (k = cao thực / 442, tối thiểu 0,5; chiều rộng dải đặt `100/k %` để vẫn kín ngang). Mọi tính toán vị trí/cuộn vẫn dùng đơn vị gốc 159 px/hàng, chỉ phần hiển thị được nhân `k`. Đã kiểm ở 390x664, 390x730, 390x844 (giả lập): đủ 3 hàng, cuộn qua 5 ô nhịp đúng, không lỗi.
 
 ## Kiến trúc game trong `Component`
 
