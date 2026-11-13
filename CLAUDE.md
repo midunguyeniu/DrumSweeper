@@ -43,6 +43,10 @@ Nội dung `src/`:
 
 Không được: sửa `DrumStar-Sweep-v2-phone.html` ở thư mục gốc (đó là bản gốc tham chiếu, `docs/index.html` mới là bản ra từ `src/`), và đừng đưa `</script` vào `game.js`.
 
+## Cẩn thận khi thêm sự kiện trong template
+
+Bộ chạy "dc" chỉ gắn các sự kiện trong `EVENT_MAP`: `onclick, onchange, oninput, onsubmit, onkeydown, onkeyup, onkeypress, onmousedown, onmouseup, onmouseenter, onmouseleave, onfocus, onblur, ondoubleclick, oncontextmenu`. Mọi `on...` khác (như `onpointerdown`, `ontouchstart`) **bị bỏ qua âm thầm, không báo lỗi**. Đó là lý do trước đây chạm/nhấp vào trống không ăn (chỉ phím F/D/G chạy), cả ở bản gốc. Đã sửa (2026-11-13): nút trống có `data-drum="blue|red|yellow"` và `game.js` bắt `pointerdown` ở cấp `window` (`this.drumHandler`). Cần sự kiện ngoài danh sách trên thì làm theo cách đó, đừng viết `onpointerdown="{{ ... }}"` trong template. Hàm `tapBlue/tapRed/tapYellow` trong `renderVals()` giờ không còn được gọi.
+
 ## Kiến trúc game trong `Component`
 
 - **`SONGS`**: danh sách bài. Mỗi bài có `bpm`, `difficulty`, `bars`, và nốt mô tả theo 1 trong 3 cách: `sections` (nhóm ô nhịp lặp lại), `barList` (liệt kê từng ô nhịp, dùng cho `s6`), hoặc `notes`. Nốt là `[step, màu]`, 1 ô nhịp 4/4 = 16 step (nốt móc kép). `drums: 3` đánh dấu bài 3 trống (tab 3, thêm màu vàng); bài còn lại 2 trống (đỏ/xanh). `num` hiển thị bị đánh số lại theo tab, còn `id` (`s1`..`s8`, `s4b`, `s3d1`) mới là khoá thật, dùng ở nhiều chỗ.

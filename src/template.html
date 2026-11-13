@@ -217,10 +217,10 @@
 
   <!-- DRUMS (big, bottom-anchored like the reference) -->
   <div style="{{ drumsRowStyle }}">
-    <button onpointerdown="{{ tapBlue }}" style="{{ blueStyle }}" ontouchstart="event.preventDefault()"></button>
-    <button onpointerdown="{{ tapRed }}" style="{{ redStyle }}" ontouchstart="event.preventDefault()"></button>
+    <button data-drum="blue" aria-label="Blue drum" style="{{ blueStyle }}"></button>
+    <button data-drum="red" aria-label="Red drum" style="{{ redStyle }}"></button>
     <sc-if value="{{ show3 }}" hint-placeholder-val="{{ false }}">
-      <button onpointerdown="{{ tapYellow }}" style="{{ yellowStyle }}" ontouchstart="event.preventDefault()"></button>
+      <button data-drum="yellow" aria-label="Yellow drum" style="{{ yellowStyle }}"></button>
     </sc-if>
   </div>
 

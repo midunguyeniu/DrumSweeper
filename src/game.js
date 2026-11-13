@@ -143,6 +143,17 @@ class Component extends DCLogic {
       this.startFromArmed();
     };
     window.addEventListener('pointerdown', this.pointerHandler);
+    // Drum taps (touch / mouse / pen). The dc runtime has no `onpointerdown` binding (its event map only
+    // covers click, mousedown, key*, ...), so a template `onpointerdown` is silently dropped and the
+    // drums never react. Listen on window instead and find the drum via its data-drum attribute.
+    // One pointerdown per finger, so multi-touch (both drums at once) works.
+    this.drumHandler = (e) => {
+      const el = e.target && e.target.closest && e.target.closest('[data-drum]');
+      if (!el) return;
+      e.preventDefault();
+      this.hit(el.getAttribute('data-drum'));
+    };
+    window.addEventListener('pointerdown', this.drumHandler);
     this.raf = requestAnimationFrame((t) => this.tick(t));
   }
   playBarClick() {
@@ -166,6 +177,7 @@ class Component extends DCLogic {
     if (this.countTimer) clearTimeout(this.countTimer);
     window.removeEventListener('keydown', this.keyHandler);
     window.removeEventListener('pointerdown', this.pointerHandler);
+    window.removeEventListener('pointerdown', this.drumHandler);
   }
 
   // 3-2-1 count-in synced to the song tempo (one count per beat), then start.
