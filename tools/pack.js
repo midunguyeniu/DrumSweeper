@@ -1,6 +1,6 @@
 'use strict';
 // Đóng gói src/ lại thành file game chạy được.
-// Dùng: node tools/pack.js [--src src] [--out build/DrumStar-Sweep-v2-phone.html]
+// Dùng: node tools/pack.js [--src src] [--out docs/index.html]
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
@@ -9,7 +9,7 @@ const { MIME_BY_EXT, TEMPLATE_MARK, DC_MARK, ASSET_RE, parseArgs, encodeTemplate
 const { opts } = parseArgs(process.argv.slice(2));
 const root = path.resolve(__dirname, '..');
 const srcDir = path.resolve(opts.src || path.join(root, 'src'));
-const outPath = path.resolve(opts.out || path.join(root, 'build', 'DrumStar-Sweep-v2-phone.html'));
+const outPath = path.resolve(opts.out || path.join(root, 'docs', 'index.html'));
 
 const read = (f) => fs.readFileSync(path.join(srcDir, f), 'utf8');
 const game = read('game.js'), tpl = read('template.html'), frame = read('frame.html');
