@@ -30,7 +30,7 @@ Cảnh báo khi đọc: file chỉ ~207 dòng nhưng có dòng dài hàng MB (ma
 Hai công cụ Node trong `tools/` (không cần cài gì thêm):
 
 - `node tools/unpack.js [bundle.html] [--out src] [--force]`: tách bundle thành `src/`. Chỉ chạy khi muốn bắt đầu lại từ bundle; nếu `src/` đã có file thì từ chối chạy, `--force` sẽ ghi đè và mất các chỗ đã sửa.
-- `node tools/pack.js [--src src] [--out build/DrumStar-Sweep-v2-phone.html]`: đóng gói `src/` thành file chạy được ở `build/`. Trước khi đóng gói nó kiểm cú pháp `game.js`, kiểm `</script`, kiểm nhạc/ảnh còn đủ.
+- `node tools/pack.js [--src src] [--out docs/index.html]`: đóng gói `src/` thành file chạy được ở `docs/index.html`. Trước khi đóng gói nó kiểm cú pháp `game.js`, kiểm `</script`, kiểm nhạc/ảnh còn đủ.
 
 Nội dung `src/`:
 - `game.js`: logic game (class `Component`, ~56 KB). **Sửa ở đây.**
@@ -40,7 +40,7 @@ Nội dung `src/`:
 
 Đã kiểm chứng (2026-11-13): unpack rồi pack ra file **giống từng byte** với bản gốc; sửa thử một tên bài trong `game.js`, đóng gói, mở trong trình duyệt thì tên mới hiện đúng, không lỗi console. Chưa kiểm chứng: đồng bộ nhạc sau khi đổi file nhạc, và chơi trọn một bài sau khi sửa logic.
 
-Không được: sửa `DrumStar-Sweep-v2-phone.html` ở thư mục gốc (đó là bản gốc tham chiếu, `build/` mới là bản ra từ `src/`), và đừng đưa `</script` vào `game.js`.
+Không được: sửa `DrumStar-Sweep-v2-phone.html` ở thư mục gốc (đó là bản gốc tham chiếu, `docs/index.html` mới là bản ra từ `src/`), và đừng đưa `</script` vào `game.js`.
 
 ## Kiến trúc game trong `Component`
 
@@ -55,5 +55,5 @@ Không được: sửa `DrumStar-Sweep-v2-phone.html` ở thư mục gốc (đó
 
 ## Khi chỉnh sửa
 
-- Không có git: trước khi sửa lớn, sao lưu `src/` (và giữ nguyên bản gốc ở thư mục gốc). Sau mỗi thay đổi: `node tools/pack.js`, rồi phục vụ file `build/` qua http (Node, cổng khác 8765) và chơi thử một bài; đừng báo "xong" nếu chưa chạy thử. Việc gì chưa kiểm thì nói rõ.
+- Repo git công khai: https://github.com/midunguyeniu/DrumSweeper (nhánh `main`). Trang chơi: https://midunguyeniu.github.io/DrumSweeper/ (GitHub Pages, phục vụ thư mục `docs/` của `main`, cập nhật sau mỗi lần push; build mất ~1 phút). `.gitignore` bỏ qua `backup/` và hai file `.html` ở thư mục gốc. Trước khi sửa lớn, commit hoặc sao lưu `src/` vào `backup/`. Sau mỗi thay đổi: `node tools/pack.js`, rồi phục vụ file `docs/index.html` qua http (Node, cổng khác 8765) và chơi thử một bài; đừng báo "xong" nếu chưa chạy thử. Việc gì chưa kiểm thì nói rõ.
 - Đây là bản tải từ mạng; nếu chủ dự án có bản nguồn chỉnh sửa được trên nền tảng gốc, bản đó mới là nguồn thật, file này chỉ là bản đóng gói.
