@@ -141,7 +141,7 @@
   @keyframes popC { 0% { transform: scale(.3); opacity: 0; } 30% { transform: scale(1.2); opacity: 1; } 70% { transform: scale(1); opacity: 1; } 100% { transform: scale(1); opacity: .85; } }
   @keyframes emberFloat { 0% { transform: translateY(0) scale(1); opacity: 0; } 15% { opacity: .9; } 100% { transform: translateY(-140px) scale(.3); opacity: 0; } }
   @keyframes starReveal { 0% { transform: scale(0) rotate(-120deg); opacity: 0; } 55% { transform: scale(1.4) rotate(12deg); opacity: 1; } 78% { transform: scale(.88) rotate(-4deg); } 100% { transform: scale(1) rotate(0deg); opacity: 1; } }
-  @media (hover: none) and (pointer: coarse) { .kbd-hint { visibility: hidden !important; } }
+  @media (hover: none) and (pointer: coarse) { .kbd-hint { display: none !important; } }
   /* Phím bàn phím 3D dùng cho hướng dẫn phím (chỉ hiện trên máy có chuột) */
   .keycap { position: relative; width: 84px; height: 84px; border-radius: 18px; display: flex; align-items: center; justify-content: center;
     background: linear-gradient(160deg, #f4f4f4 0%, #b9b9b9 45%, #7b7b7b 100%);
@@ -259,7 +259,7 @@
     </div>
   </sc-if>
   <sc-if value="{{ armed }}" hint-placeholder-val="{{ false }}">
-    <div style="position:absolute; inset:0; z-index:9; pointer-events:none; background:rgba(6,4,3,.7); display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:26px; padding-bottom:150px;">
+    <div style="{{ armedOverlayStyle }}">
       <img src="4885361b-64b5-450a-8918-1721be0ef86a" alt="Tap to Start" style="width:78%; max-width:360px; height:auto; filter:drop-shadow(0 8px 14px rgba(0,0,0,.5)); animation:tapPulse 1s ease-in-out infinite;">
       <div class="kbd-hint" style="{{ keycapRowStyle }}">
         <sc-if value="{{ showBlueKey }}" hint-placeholder-val="{{ true }}">

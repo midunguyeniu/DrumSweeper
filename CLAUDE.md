@@ -43,9 +43,21 @@ Nội dung `src/`:
 
 Không được: sửa `DrumStar-Sweep-v2-phone.html` ở thư mục gốc (đó là bản gốc tham chiếu, `docs/index.html` mới là bản ra từ `src/`), và đừng đưa `</script` vào `game.js`.
 
+## Khung báo lỗi của bundle
+
+`frame.html` có khung đỏ `[bundle] ...` hiện mọi lỗi JavaScript của trang. Mặc định **ẩn** (trình duyệt trong Zalo/Facebook chèn mã gây lỗi `zaloJSV2`... không liên quan game); thêm `?debug` vào cuối link để hiện khi cần kiểm tra trên điện thoại. Lỗi vẫn luôn có trong console. Đã kiểm 2026-11-13 bằng giả lập: không `?debug` thì ẩn, có `?debug` thì hiện.
+
 ## Cẩn thận khi thêm sự kiện trong template
 
 Bộ chạy "dc" chỉ gắn các sự kiện trong `EVENT_MAP`: `onclick, onchange, oninput, onsubmit, onkeydown, onkeyup, onkeypress, onmousedown, onmouseup, onmouseenter, onmouseleave, onfocus, onblur, ondoubleclick, oncontextmenu`. Mọi `on...` khác (như `onpointerdown`, `ontouchstart`) **bị bỏ qua âm thầm, không báo lỗi**. Đó là lý do trước đây chạm/nhấp vào trống không ăn (chỉ phím F/D/G chạy), cả ở bản gốc. Đã sửa (2026-11-13): nút trống có `data-drum="blue|red|yellow"` và `game.js` bắt `pointerdown` ở cấp `window` (`this.drumHandler`). Cần sự kiện ngoài danh sách trên thì làm theo cách đó, đừng viết `onpointerdown="{{ ... }}"` trong template. Hàm `tapBlue/tapRed/tapYellow` trong `renderVals()` giờ không còn được gọi.
+
+## Trống lớn ở bài 2 trống
+
+Bài 2 trống dùng trống to: mỗi trống rộng `min(72%, 32dvh)` (hằng `DRUM2_D` trong `renderVals()` của `game.js`), hai trống đứng sát nhau, phần mép ngoài tràn ra cạnh màn hình (margin âm), chạm vẫn ăn vì nút kéo dài ra ngoài. Muốn nhỏ lại thì đổi `DRUM2_D` (ví dụ `min(60%, 28dvh)`). Hệ quả: khuông nhạc bị ép thấp hơn nên co nhiều hơn (tỷ lệ ~0,79 ở màn 844, ~0,61 ở 730, ~0,51 ở 664; giới hạn dưới 0,4). Màn `Tap to Start` (`armedOverlayStyle`) và hàng phím (`KEY_PAD2`) nâng/căn theo cùng `DRUM2_D`. Trên máy cảm ứng hàng phím bị `display:none` nên `Tap to Start` nằm sát trên trống.
+
+## Bố cục 3 trống (kiểu bộ trống)
+
+Bài 3 trống (khối `if (drums3)` trong `renderVals()` của `game.js`) xếp theo hình tham chiếu của chủ dự án: trống đỏ to ở giữa (đường kính `min(70% bề ngang, 31% chiều cao màn)`, đáy tràn ra ngoài ~10%), trống xanh (trái) và vàng (phải) bằng 0,6 lần, nằm cao hơn, **đè lên trước** mép trống đỏ và tràn ra cạnh màn hình. Các trống dùng `position:absolute` tính bằng px từ kích thước màn (đọc `window.innerWidth/innerHeight`, render lại khi `resize`); các hệ số 0,70 / 0,31 / 0,6 / 0,59 / 0,32 chỉnh được tại đó. Vì các nút vuông chồng lên nhau, `drumHandler` chọn trống theo **hình tròn** (duyệt các phần tử dưới ngón tay từ trên xuống, lấy trống đầu tiên có vòng tròn chứa điểm chạm). Ảnh trống xanh/đỏ chừa lề rộng hơn đĩa vàng (vành chỉ chiếm 88% bề ngang ảnh, đĩa vàng 99%; đo bằng canvas trên `src/assets/*.png`), nên khung trống xanh được phóng thêm 0,99/0,884 (`Dsb`) để vành trông bằng đĩa vàng. Hàng phím và `Tap to Start` (`kit.keyGap`, `kit.rowH`) căn theo tâm từng trống. Đã kiểm 2026-11-13 bằng giả lập: chọn đúng trống ở tâm và ở vùng chồng, chạm thật ăn hit; chưa kiểm trống xanh bằng chạm thật.
 
 ## Khuông nhạc co theo chiều cao màn hình
 

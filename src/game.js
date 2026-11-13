@@ -154,15 +154,25 @@ class Component extends DCLogic {
     // covers click, mousedown, key*, ...), so a template `onpointerdown` is silently dropped and the
     // drums never react. Listen on window instead and find the drum via its data-drum attribute.
     // One pointerdown per finger, so multi-touch (both drums at once) works.
+    // Drums can overlap (3-drum kit), and every button is a square, so decide by the drum's CIRCLE:
+    // walk the elements under the finger from the top down and take the first drum whose circle contains it.
+    // A tap on a button's square corner (outside its circle) still counts for that button if nothing else matches.
     this.drumHandler = (e) => {
-      const el = e.target && e.target.closest && e.target.closest('[data-drum]');
-      if (!el) return;
+      const under = (document.elementsFromPoint ? document.elementsFromPoint(e.clientX, e.clientY) : [e.target])
+        .map((n) => n && n.closest && n.closest('[data-drum]')).filter(Boolean);
+      const stack = under.filter((el, i) => under.indexOf(el) === i);
+      if (!stack.length) return;
+      const inCircle = (el) => {
+        const r = el.getBoundingClientRect(), rad = Math.min(r.width, r.height) / 2;
+        return Math.hypot(e.clientX - (r.left + r.width / 2), e.clientY - (r.top + r.height / 2)) <= rad;
+      };
+      const el = stack.find(inCircle) || stack[0];
       e.preventDefault();
       this.hit(el.getAttribute('data-drum'));
     };
     window.addEventListener('pointerdown', this.drumHandler);
     // screen height changes (rotation, Safari toolbar showing/hiding) -> re-fit the stave
-    this.onResize = () => this.measureStave();
+    this.onResize = () => this.forceUpdate(); // re-render (3-drum kit size depends on the screen); componentDidUpdate re-measures the stave
     window.addEventListener('resize', this.onResize);
     this.raf = requestAnimationFrame((t) => this.tick(t));
   }
@@ -253,7 +263,7 @@ class Component extends DCLogic {
   measureStave() {
     const el = document.querySelector('[data-stave-viewport]');
     if (!el || !el.clientHeight) return;
-    const k = Math.max(0.5, Math.min(1, el.clientHeight / this.STAVE_FULL_H));
+    const k = Math.max(0.4, Math.min(1, el.clientHeight / this.STAVE_FULL_H));
     if (Math.abs(k - (this.stripScale || 1)) > 0.004) { this.stripScale = k; this.forceUpdate(); }
   }
 
@@ -854,15 +864,23 @@ class Component extends DCLogic {
       WebkitTapHighlightColor: 'transparent'
     };
     const PRESS = 'translateY(3px) scale(.96)', REST = 'translateY(0) scale(1)';
+    // 2-drum layout: BIG drums, each ~72% of the screen width (capped at 32% of the screen height so the
+    // stave stays usable), side by side, with the outer part of each drum running off the screen edge.
+    // Change DRUM2_D to resize (e.g. 'min(60%, 28dvh)' = smaller). Not used for 3-drum songs.
+    const DRUM2_D = 'min(72%, 32dvh)';
+    const big2 = drums3 ? {} : { flex: 'none', width: DRUM2_D, height: 'auto', aspectRatio: '1', maxWidth: 'none', padding: '4px' };
+    const KEY_PAD2 = 'max(0px, calc(50% - ' + DRUM2_D + ' / 2 - 42px))'; // key (84px wide) centred over a drum centre
     const blueStyle = {
-      ...drumImgBase,
+      ...drumImgBase, ...big2,
+      ...(drums3 ? {} : { marginLeft: 'min(0px, calc(50% - ' + DRUM2_D + '))' }),
       backgroundImage: 'url(@@ASSET:blue-drum.png@@)',
       filter: blueDisabled ? 'grayscale(1) brightness(.55) opacity(.6)' : (bluePressed ? 'drop-shadow(0 0 26px rgba(41,197,230,.85)) brightness(1.12)' : 'drop-shadow(0 10px 16px rgba(0,0,0,.45))'),
       transform: (!blueDisabled && bluePressed) ? PRESS : REST,
       pointerEvents: blueDisabled ? 'none' : 'auto', cursor: blueDisabled ? 'default' : 'pointer'
     };
     const redStyle = {
-      ...drumImgBase,
+      ...drumImgBase, ...big2,
+      ...(drums3 ? {} : { marginRight: 'min(0px, calc(50% - ' + DRUM2_D + '))' }),
       backgroundImage: 'url(@@ASSET:red-drum.png@@)',
       filter: redPressed ? 'drop-shadow(0 0 26px rgba(255,90,50,.85)) brightness(1.12)' : 'drop-shadow(0 10px 16px rgba(0,0,0,.45))',
       transform: redPressed ? PRESS : REST
@@ -876,15 +894,31 @@ class Component extends DCLogic {
     };
     // 3-drum KIT layout: big red tom front-and-center, blue tom tucked behind-left, gold cymbal
     // behind-right, overlapping like a real kit (matches the reference).
+    // Layout (px, from the screen size): the red drum is big and centred with its bottom edge running a bit
+    // off-screen; blue (left) and yellow (right) are ~60% of its size, sit higher, overlap the red drum's edges
+    // IN FRONT of it, and run off the left/right screen edge. Tweak the 0.70 / 0.31 (size), 0.6 (side drum
+    // size), 0.59 (side offset) and 0.32 (side height) below. Taps are resolved by circle (see drumHandler).
+    let kit = null;
     if (drums3) {
-      Object.assign(redStyle,    { height: 'min(248px, 26dvh)', maxWidth: '46%', zIndex: 3, marginBottom: '0' });
-      Object.assign(blueStyle,   { height: 'min(196px, 21dvh)', maxWidth: '38%', zIndex: 1, marginBottom: '34px', marginRight: '-9%' });
-      Object.assign(yellowStyle, { height: 'min(196px, 21dvh)', maxWidth: '38%', zIndex: 1, marginBottom: '28px', marginLeft: '-9%' });
+      const colW = Math.min(window.innerWidth || 390, 430), winH = window.innerHeight || 800;
+      const Dr = Math.round(Math.min(0.70 * colW, 0.31 * winH)), Ds = Math.round(Dr * 0.6);
+      const cyR = Math.round(0.12 * Dr) + Dr / 2; // centre y of the red drum
+      const place = (cx, cy, d) => ({
+        position: 'absolute', flex: 'none', maxWidth: 'none', marginBottom: '0', marginLeft: '0', marginRight: '0',
+        width: d + 'px', height: d + 'px', left: Math.round(cx - d / 2) + 'px', top: Math.round(cy - d / 2) + 'px', padding: '4px'
+      });
+      Object.assign(redStyle,    place(colW / 2, cyR, Dr),                  { zIndex: 1 });
+      // The blue drum image has more empty margin (its rim is only 88% of the image width) than the gold cymbal
+      // image (99%), so give the blue box 12% more size to make the two look equally big.
+      const Dsb = Math.round(Ds * 0.99 / 0.884);
+      Object.assign(blueStyle,   place(colW / 2 - 0.59 * Dr, cyR - 0.31 * Dr, Dsb), { zIndex: 3 });
+      Object.assign(yellowStyle, place(colW / 2 + 0.59 * Dr, cyR - 0.31 * Dr, Ds),  { zIndex: 3 });
+      kit = { Dr, rowH: Math.round(1.02 * Dr), keyGap: Math.max(0, Math.round(0.59 * Dr - 84)) };
     }
-    const drumsRowStyle = {
-      position: 'relative', zIndex: 10, padding: '0 10px 6px', marginTop: 'auto', flexShrink: 0,
-      display: 'flex', gap: drums3 ? '0' : '8px', alignItems: 'flex-end', justifyContent: 'center'
-    };
+    const drumsRowStyle = drums3
+      ? { position: 'relative', zIndex: 10, width: '100%', height: kit.rowH + 'px', marginTop: 'auto', flexShrink: 0 }
+      : { position: 'relative', zIndex: 10, padding: '0 0 6px', marginTop: 'auto', flexShrink: 0,
+          display: 'flex', gap: '0', alignItems: 'flex-end', justifyContent: 'space-between' };
 
     // judgment element (keyed so animation restarts on each new judgment)
     const jColors = { 'PERFECT!': '#ffcc33', 'GREAT': '#b57cff', 'GOOD': '#6ee87a', 'MISS': '#ff5a5a' };
@@ -965,8 +999,17 @@ class Component extends DCLogic {
       show3: this.state.songId != null ? drums3 : (this.state.tab === 3),
       showBlueKey: !blueDisabled,
       keycapRowStyle: blueDisabled
-        ? { display: 'flex', width: '100%', justifyContent: 'flex-end', paddingRight: '18%', alignItems: 'flex-end', boxSizing: 'border-box' }
-        : { display: 'flex', gap: drums3 ? '43px' : '88px', alignItems: 'flex-end' },
+        ? { display: 'flex', width: '100%', justifyContent: 'flex-end', paddingRight: KEY_PAD2, alignItems: 'flex-end', boxSizing: 'border-box' }
+        : (drums3
+            ? { display: 'flex', gap: kit.keyGap + 'px', alignItems: 'flex-end' }
+            // 2 drums: put each key over the visible centre of its (big) drum
+            : { display: 'flex', width: '100%', justifyContent: 'space-between', padding: '0 ' + KEY_PAD2, alignItems: 'flex-end', boxSizing: 'border-box' }),
+      // Tap-to-Start overlay: sits just above the drums (the 2-drum layout has big drums, so lift it with them)
+      armedOverlayStyle: {
+        position: 'absolute', inset: 0, zIndex: 9, pointerEvents: 'none', background: 'rgba(6,4,3,.7)',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', gap: '26px',
+        paddingBottom: drums3 ? (kit.rowH + 18) + 'px' : 'calc(' + DRUM2_D + ' + 26px)'
+      },
       showLearnIntro: this.state.armed && this.state.mode === 'learn',
       keyHint: (() => {
         const R = React.createElement;
