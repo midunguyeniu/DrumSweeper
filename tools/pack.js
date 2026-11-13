@@ -30,7 +30,12 @@ const code = game.replace(ASSET_RE, (m, name) => {
 });
 if (missing.length) { console.error('Thiếu file hoặc loại file không hỗ trợ trong assets/: ' + missing.join(', ')); process.exit(1); }
 
-const template = tpl.replace(DC_MARK, () => code);
+// Biểu tượng tab: src/icon.svg được nhúng vào chỗ @@ICON@@ trong template.html
+const iconPath = path.join(srcDir, 'icon.svg');
+const icon = fs.existsSync(iconPath)
+  ? 'data:image/svg+xml,' + encodeURIComponent(fs.readFileSync(iconPath, 'utf8').replace(/>\s+</g, '><').trim())
+  : '';
+const template = tpl.replace(DC_MARK, () => code).split('@@ICON@@').join(icon);
 const out = frame.replace(TEMPLATE_MARK, () => encodeTemplate(template));
 
 fs.mkdirSync(path.dirname(outPath), { recursive: true });
