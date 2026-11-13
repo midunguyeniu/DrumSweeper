@@ -16,7 +16,19 @@ const read = (f) => fs.readFileSync(path.join(srcDir, f), 'utf8');
 const idxPath = path.join(root, 'docs', 'freeplay', 'index.json');
 const freeIndex = fs.existsSync(idxPath) ? fs.readFileSync(idxPath, 'utf8') : '{"songs":[]}';
 JSON.parse(freeIndex);
-const game = read('game.js').split('@@FREEPLAY_INDEX@@').join(freeIndex), tpl = read('template.html'), frame = read('frame.html');
+// Chế độ bài FreePlay: embed (mặc định) = nhúng nốt + nhạc của mọi bài vào file game; download = để trống, tải từ docs/freeplay/ khi bấm chơi
+const freeMode = String(opts.free || 'embed');
+if (freeMode !== 'embed' && freeMode !== 'download') { console.error('--free phải là embed hoặc download'); process.exit(1); }
+const freeEmbed = {};
+if (freeMode === 'embed') {
+  for (const s of JSON.parse(freeIndex).songs) {
+    const jf = path.join(root, 'docs', 'freeplay', s.id + '.json'), af = path.join(root, 'docs', 'freeplay', s.id + '.ogg');
+    if (!fs.existsSync(jf) || !fs.existsSync(af)) { console.error('Thiếu file bài ' + s.id + ' trong docs/freeplay/'); process.exit(1); }
+    const d = JSON.parse(fs.readFileSync(jf, 'utf8'));
+    freeEmbed[s.id] = { bars: d.bars, abs: { red: d.red, blue: d.blue, yellow: d.yellow }, audio: 'data:audio/ogg;base64,' + fs.readFileSync(af).toString('base64') };
+  }
+}
+const game = read('game.js').split('@@FREEPLAY_INDEX@@').join(freeIndex).split('@@FREEPLAY_EMBED@@').join(JSON.stringify(freeEmbed)), tpl = read('template.html'), frame = read('frame.html');
 
 // Kiểm tra trước khi đóng gói
 try { new vm.Script(game, { filename: 'game.js' }); }
@@ -44,4 +56,4 @@ const out = frame.split('@@ICON@@').join(icon).replace(TEMPLATE_MARK, () => enco
 
 fs.mkdirSync(path.dirname(outPath), { recursive: true });
 fs.writeFileSync(outPath, out);
-console.log(`Đã đóng gói: ${outPath} (${(out.length / 1048576).toFixed(1)} MB)`);
+console.log(`Đã đóng gói: ${outPath} (${(out.length / 1048576).toFixed(1)} MB), bài FreePlay: ${freeMode === 'embed' ? 'nhúng sẵn ' + Object.keys(freeEmbed).length + ' bài' : 'tải qua mạng khi bấm chơi'}`);

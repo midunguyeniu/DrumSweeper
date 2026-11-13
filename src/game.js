@@ -49,6 +49,9 @@ class Component extends DCLogic {
   ];
   // FreePlay: danh sách + nốt + nhạc nằm ở docs/freeplay/ (index.json, <id>.json, <id>.ogg), chỉ tải khi cần
   FREE_BASE = 'freeplay/'; FREE_V = '1';
+  // Bài FreePlay/remote nhúng sẵn trong file game: { id: { bars, abs: {red,blue,yellow}, audio: 'data:audio/ogg;base64,...' } }.
+  // Rỗng ({}) khi đóng gói ở chế độ download (khi đó nốt + nhạc tải từ freeplay/ lúc bấm chơi). Chọn chế độ bằng: node tools/pack.js --free embed|download
+  FREE_EMBED = @@FREEPLAY_EMBED@@;
   // danh sách bài FreePlay (tên, nghệ sĩ, BPM, sao...) nhúng sẵn từ docs/freeplay/index.json lúc đóng gói, nên hiện ngay không cần mạng
   freeSongs = (@@FREEPLAY_INDEX@@).songs.map((s) => Object.assign({}, s, { remote: true, free: true }));
   findSong(id) {
@@ -72,11 +75,18 @@ class Component extends DCLogic {
     if (!this.musicBufs) this.musicBufs = {};
     if (!this.remoteOrder) this.remoteOrder = [];
     const jobs = [];
-    if (!this.remoteAbs[id]) {
+    const emb = this.FREE_EMBED[id];
+    if (emb) {
+      // nhúng sẵn: không cần mạng; chỉ giải mã nhạc khi bài được chọn (tiết kiệm RAM)
+      if (!this.remoteAbs[id]) { this.remoteAbs[id] = emb.abs; if (emb.bars) song.bars = emb.bars; }
+      if (!this.musicBufs[id] && this.ac) {
+        jobs.push(fetch(emb.audio).then((r) => r.arrayBuffer()).then((b) => this.ac.decodeAudioData(b)).then((buf) => { this.musicBufs[id] = buf; }));
+      }
+    } else if (!this.remoteAbs[id]) {
       jobs.push(fetch(this.FREE_BASE + id + '.json?v=' + this.FREE_V).then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
         .then((d) => { this.remoteAbs[id] = { red: d.red || [], blue: d.blue || [], yellow: d.yellow || [] }; if (d.bars) song.bars = d.bars; }));
     }
-    if (!this.musicBufs[id] && this.ac) {
+    if (!emb && !this.musicBufs[id] && this.ac) {
       jobs.push(fetch(this.FREE_BASE + id + '.ogg?v=' + this.FREE_V).then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.arrayBuffer(); })
         .then((b) => this.ac.decodeAudioData(b)).then((buf) => { this.musicBufs[id] = buf; }));
     }
