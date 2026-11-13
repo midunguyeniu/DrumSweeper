@@ -746,6 +746,11 @@ class Component extends DCLogic {
     const totalBars = song.bars;
     const bar = Math.max(-1, Math.min(totalBars, Math.floor(ph / 16) - 1));
 
+    // Stave timeline: step 0 sits at 5% of the track and the sweep's reachable end (ROW - LEAD steps, because the
+    // strip hands off to the next row LEAD steps early) sits at TRACK_END%. Everything (notes, beat labels, grid,
+    // sweep) uses SPAN so there is no dead zone after the sweep any more (it used to be ~7% of the width).
+    const TRACK_END = 98.5;
+    const SPAN = (TRACK_END - 5) * ROW / (ROW - LEAD); // % of track width that the full 2-bar row (ROW steps) would span
     const buildStave = (seg, active) => {
       const rowStart = seg * ROW;
       const empty = seg > maxSeg || rowStart >= this.songLen();
@@ -759,7 +764,7 @@ class Component extends DCLogic {
         .map(({ n, i }) => {
           const st = status[i] || 'pending';
           const p = (n.step - rowStart) / ROW;                 // 0..1 at 2-bar scale (natural per-bar width)
-          const leftPct = 5 + p * 93;                          // beat 1 inset enough that the larger downbeat note isn't clipped; spans to ~98%
+          const leftPct = 5 + p * SPAN;                        // beat 1 inset enough that the larger downbeat note isn't clipped
           const isBlue = n.color === 'blue';
           const isYellow = n.color === 'yellow';
           // lane centers within the 130px track. 3-drum songs use 3 lanes (yellow top, blue mid, red bottom).
@@ -788,7 +793,7 @@ class Component extends DCLogic {
       // beat-number markers — only the bars this row contains, at natural (2-bar) width
       const beats = Array.from({ length: barsInRow * 4 }, (_, b) => {
         const step = b * 4;
-        const x = 5 + (step / ROW) * 93;
+        const x = 5 + (step / ROW) * SPAN;
         const isDown = (b % 4) === 0;
         return {
           id: b, label: String((b % 4) + 1),
@@ -800,13 +805,7 @@ class Component extends DCLogic {
         };
       });
       // grid lines at constant per-bar width; a 1-bar row only covers the left half (no stretch)
-      const gridStyle = {
-        position: 'absolute', top: 0, bottom: 0, left: '5%', width: (barsInRow * 46.5) + '%', pointerEvents: 'none',
-        backgroundImage:
-          'repeating-linear-gradient(90deg, rgba(255,255,255,.05) 0 1px, transparent 1px calc(100%/' + (rowSteps / 2) + ')),' +
-          'repeating-linear-gradient(90deg, rgba(255,255,255,.12) 0 1px, transparent 1px calc(100%/' + (rowSteps / 4) + ')),' +
-          'repeating-linear-gradient(90deg, rgba(255,255,255,.5) 0 2px, transparent 2px calc(100%/' + barsInRow + '))'
-      };
+      const gridStyle = { position: 'absolute', top: 0, bottom: 0, left: 0, width: 0, pointerEvents: 'none' };
       const wrap = {
         display: 'flex', alignItems: 'stretch', gap: '6px', padding: '5px',
         position: 'relative', boxSizing: 'border-box', height: ROWH + 'px',
@@ -818,7 +817,7 @@ class Component extends DCLogic {
       };
       const sweepStyle = {
         position: 'absolute', top: '-2px', bottom: '-2px',
-        left: (5 + localPh / ROW * 93) + '%', width: '3px', transform: 'translateX(-50%)',
+        left: Math.min(5 + localPh / ROW * SPAN, TRACK_END) + '%', width: '3px', transform: 'translateX(-50%)',
         background: 'linear-gradient(180deg,#fff,#ffcc33)',
         boxShadow: '0 0 10px 2px rgba(255,204,51,.9), 0 0 22px 6px rgba(255,150,40,.5)',
         borderRadius: '2px', pointerEvents: 'none',
@@ -830,12 +829,21 @@ class Component extends DCLogic {
         opacity: active ? 0 : 1, transition: 'opacity .18s'
       };
       const R = React.createElement;
+      // grid lines drawn as real elements (a gradient with fractional periods dropped lines when the strip is scaled)
+      const gridLines = [];
+      for (let st = 0; st <= barsInRow * 16; st += 2) {
+        const isBar = st % 16 === 0, isBeat = st % 4 === 0;
+        gridLines.push(R('div', { key: 'g' + st, style: {
+          position: 'absolute', top: 0, bottom: 0, left: (5 + st / ROW * SPAN) + '%',
+          width: isBar ? '2px' : '1px', marginLeft: isBar ? '-1px' : '-0.5px', pointerEvents: 'none',
+          background: isBar ? 'rgba(255,255,255,.5)' : isBeat ? 'rgba(255,255,255,.12)' : 'rgba(255,255,255,.06)' } }));
+      }
       const decorEls = drums3
-        ? R(React.Fragment, null,
+        ? R(React.Fragment, null, gridLines,
             R('div', { key: 'y', style: { position: 'absolute', left: 0, right: 0, top: 0, height: '33.34%', background: 'linear-gradient(90deg, rgba(255,200,40,.07), transparent)' } }),
             R('div', { key: 'b', style: { position: 'absolute', left: 0, right: 0, top: '33.34%', height: '33.33%', background: 'linear-gradient(90deg, rgba(41,197,230,.07), transparent)' } }),
             R('div', { key: 'r', style: { position: 'absolute', left: 0, right: 0, bottom: 0, height: '33.33%', background: 'linear-gradient(90deg, rgba(255,90,50,.07), transparent)' } }))
-        : R(React.Fragment, null,
+        : R(React.Fragment, null, gridLines,
             R('div', { key: 'c', style: { position: 'absolute', left: 0, right: 0, top: '50%', height: '2px', background: 'rgba(255,255,255,.08)' } }),
             R('div', { key: 'b', style: { position: 'absolute', left: 0, right: 0, top: 0, height: '50%', background: 'linear-gradient(90deg, rgba(41,197,230,.06), transparent)' } }),
             R('div', { key: 'r', style: { position: 'absolute', left: 0, right: 0, bottom: 0, height: '50%', background: 'linear-gradient(90deg, rgba(255,77,77,.06), transparent)' } }));
