@@ -48,7 +48,7 @@ class Component extends DCLogic {
     { id: 's3d15', num: 15, title: 'The Less I Know The Better', artist: 'Tame Impala', bpm: 117, difficulty: 'Hard', stars: 9, bars: 30, drums: 3, remote: true },
   ];
   // FreePlay: danh sách + nốt + nhạc nằm ở docs/freeplay/ (index.json, <id>.json, <id>.ogg), chỉ tải khi cần
-  FREE_BASE = 'freeplay/'; FREE_V = '1';
+  FREE_BASE = 'freeplay/'; FREE_V = '2';
   // Bài FreePlay/remote nhúng sẵn trong file game: { id: { bars, abs: {red,blue,yellow}, audio: 'data:audio/ogg;base64,...' } }.
   // Rỗng ({}) khi đóng gói ở chế độ download (khi đó nốt + nhạc tải từ freeplay/ lúc bấm chơi). Chọn chế độ bằng: node tools/pack.js --free embed|download
   FREE_EMBED = @@FREEPLAY_EMBED@@;
@@ -65,7 +65,8 @@ class Component extends DCLogic {
   // danh sách bài đang hiện: Learn (SONGS, trừ bài chỉ có ở FreePlay) hoặc FreePlay (index.json), theo tab 2/3 trống
   listFor(main, tab) {
     return main === 'free'
-      ? (this.freeSongs || []).filter(s => (s.drums || 2) === tab)
+      // FreePlay: xếp từ dễ đến khó theo số sao độ khó; bằng sao thì giữ thứ tự gốc trong bảng
+      ? (this.freeSongs || []).filter(s => (s.drums || 2) === tab).sort((x, y) => (x.stars - y.stars) || (x.num - y.num))
       : this.SONGS.filter(s => !s.freeOnly && (s.drums || 2) === tab);
   }
   // tải nốt (.json) + nhạc (.ogg) của một bài FreePlay/remote; trả về Promise
@@ -103,11 +104,21 @@ class Component extends DCLogic {
   }
   // bài import (có abs): nhạc và level đã đồng bộ sẵn, bắt đầu ngay bar 0 (step 16) nên chỉ có 1 ô nhịp đếm trước; bài thường có thêm ô nhịp mở đầu nữa (bar 1 ở step 32)
   introSteps() { return this.currentSong().abs ? 16 : 32; }
-  // độ khó kiểu osu!: 10 ô; sao nguyên = sao to sáng, phần lẻ = 1 sao nhỏ (nhỏ theo phần lẻ), ô còn lại = chấm nhỏ mờ
+  // kết quả đã đạt ở một bài (FreePlay): 3 sao 5 cánh, sao đạt được màu vàng, sao chưa đạt màu xám; 1000 điểm thì 3 sao đỏ cam
+  resultStarsEl(stars, perfect) {
+    const R = React.createElement;
+    const pts = '12,1.5 15.2,8.3 22.6,9.2 17.1,14.3 18.6,21.6 12,18 5.4,21.6 6.9,14.3 1.4,9.2 8.8,8.3';
+    return R('div', { style: { display: 'flex', justifyContent: 'center', gap: '3px' } }, [0, 1, 2].map((i) => {
+      const on = perfect || i < stars;
+      return R('svg', { key: 'r' + i, width: 22, height: 22, viewBox: '0 0 24 24', style: { display: 'block' } },
+        R('polygon', { points: pts, fill: on ? (perfect ? '#ff5a2c' : '#ffcc33') : '#3a4058', stroke: on ? (perfect ? '#a8240d' : '#c98a14') : 'none', strokeWidth: 1.2, strokeLinejoin: 'round' }));
+    }));
+  }
+  // độ khó kiểu osu!: 10 ô, dùng sao 8 cánh (khác sao 5 cánh ở màn kết quả); sao nguyên = sao to sáng, phần lẻ = 1 sao nhỏ (nhỏ theo phần lẻ), ô còn lại = chấm nhỏ mờ
   starsEl(rating) {
     const R = React.createElement, N = 10;
     const star = (key, size) => R('svg', { key, width: size, height: size, viewBox: '0 0 24 24', style: { display: 'block' } },
-      R('polygon', { fill: '#ffb43a', points: '12,1.5 15.2,8.3 22.6,9.2 17.1,14.3 18.6,21.6 12,18 5.4,21.6 6.9,14.3 1.4,9.2 8.8,8.3' }));
+      R('polygon', { fill: '#ffb43a', points: '12.0,0.5 14.8,5.3 20.1,3.9 18.7,9.2 23.5,12.0 18.7,14.8 20.1,20.1 14.8,18.7 12.0,23.5 9.2,18.7 3.9,20.1 5.3,14.8 0.5,12.0 5.3,9.2 3.9,3.9 9.2,5.3' }));
     const full = Math.floor(rating), frac = rating - full;
     const slots = [];
     for (let i = 0; i < N; i++) {
@@ -120,7 +131,7 @@ class Component extends DCLogic {
     return R('div', { style: { display: 'flex', alignItems: 'center', gap: '1px' } }, slots);
   }
   // ---- tiến độ (lưu trên máy người chơi) ----
-  // { [songId]: { play: sao tốt nhất ở Play, learn: sao tốt nhất ở Learn } }
+  // { [songId]: { play: sao tốt nhất ở Play, learn: sao tốt nhất ở Learn, score: điểm cao nhất ở Play } }
   // chạm vào nút Learn đang khoá: hiện tooltip cạnh nút khoảng 2,3 giây
   showLearnHint(id) {
     if (this.hintTimer) clearTimeout(this.hintTimer);
@@ -133,11 +144,12 @@ class Component extends DCLogic {
     }
     return this._prog;
   }
-  saveProgress(songId, mode, stars) {
+  saveProgress(songId, mode, stars, score) {
     const p = this.getProgress();
     const cur = p[songId] || { play: 0, learn: 0 };
     const key = mode === 'learn' ? 'learn' : 'play';
     if (stars > (cur[key] || 0)) cur[key] = stars;
+    if (key === 'play' && score > (cur.score || 0)) cur.score = score; // điểm cao nhất ở Play (tối đa 1000)
     p[songId] = cur;
     try { localStorage.setItem('drumsweeper.progress.v1', JSON.stringify(p)); } catch (e) { }
   }
@@ -159,8 +171,8 @@ class Component extends DCLogic {
       flex: 1, padding: '10px 0', borderRadius: '13px', cursor: 'pointer',
       border: on ? '2px solid #4bd0ff' : '2px solid rgba(255,255,255,.1)',
       background: on ? 'linear-gradient(180deg,#4bd0ff,#2a8fd0)' : 'rgba(255,255,255,.04)',
-      color: on ? '#04283a' : '#c9b8a6', fontSize: '15px', fontWeight: 800, letterSpacing: '.5px',
-      boxShadow: on ? '0 4px 0 #175f86' : 'none', transition: 'all .12s'
+      color: on ? '#fff' : '#c9b8a6', fontSize: '15px', fontWeight: 800, letterSpacing: '.5px',
+      boxShadow: on ? '0 4px 0 #175f86' : 'none', textShadow: on ? '0 1px 2px rgba(10,60,100,.7)' : 'none', transition: 'all .12s'
     };
   }
 
@@ -289,7 +301,7 @@ class Component extends DCLogic {
     // A tap on a button's square corner (outside its circle) still counts for that button if nothing else matches.
     this.drumHandler = (e) => {
       // màn chọn bài: các nút trống nằm dưới lớp danh sách, chạm vào danh sách không được kích hoạt trống
-      if (this.state.songId == null) return;
+      if (this.state.songId == null || this.state.showResult || this.state.showFail) return; // cả màn kết quả / thua: không phát tiếng trống
       const under = (document.elementsFromPoint ? document.elementsFromPoint(e.clientX, e.clientY) : [e.target])
         .map((n) => n && n.closest && n.closest('[data-drum]')).filter(Boolean);
       const stack = under.filter((el, i) => under.indexOf(el) === i);
@@ -550,7 +562,7 @@ class Component extends DCLogic {
       const rs = Math.round(this.state.score);
       const sc = rs > 950 ? 3 : rs > 800 ? 2 : rs > 500 ? 1 : 0;
       this.stopMusic();
-      this.saveProgress(this.state.songId, this.state.mode, sc);
+      this.saveProgress(this.state.songId, this.state.mode, sc, rs);
       this.setState({ playing: false, showResult: true, starsRevealed: 0, scoreShown: 0 });
       this.revealStars(sc, rs);
       return;
@@ -799,7 +811,7 @@ class Component extends DCLogic {
   }
 
   hit(color) {
-    if (this.state.songId == null) return; // màn chọn bài: không phát tiếng trống (kể cả khi bấm phím F/Space/J)
+    if (this.state.songId == null || this.state.showResult || this.state.showFail) return; // màn chọn bài: không phát tiếng trống (kể cả khi bấm phím F/Space/J)
     this.ensureAudio();
     // 2-drum song that never uses blue: the blue drum / D key is disabled
     if (color === 'blue' && (this.currentSong().drums || 2) !== 3 && !((this.notes || []).some((n) => n.color === 'blue'))) return;
@@ -1218,6 +1230,7 @@ class Component extends DCLogic {
         id: s.id, num: isFree ? idx + 1 : s.num, title: s.title, bpm: s.bpm,
         subLine: (s.artist ? s.artist + ' · ' : '') + s.bpm + ' BPM',
         showLearn: !isFree,
+        resultEl: isFree ? this.resultStarsEl(prog.play || 0, (prog.score || 0) >= 1000) : null,
         diffLabel: (s.difficulty || '').toUpperCase(),
         starEls: this.starsEl(s.stars),
         play: () => { this.playMenuClick(); this.selectSong(s.id); },
@@ -1226,15 +1239,15 @@ class Component extends DCLogic {
         learnLabel: learnOpen ? '🎧 Learn' : R(React.Fragment, null,
           R('img', { src: '@@ASSET:lock.webp@@', alt: '', width: 15, height: 15, style: { display: 'block' } }), 'Learn'),
         learnStyle: {
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', padding: '7px 10px', borderRadius: '10px',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', padding: '4px 10px', borderRadius: '10px',
           fontSize: '12px', fontWeight: 800, letterSpacing: '.5px',
           border: learnOpen ? '2px solid #4bd0ff' : '2px solid rgba(255,255,255,.12)',
           background: learnOpen ? 'rgba(75,208,255,.12)' : 'rgba(255,255,255,.04)',
           color: learnOpen ? '#8fe4ff' : '#6b7390', cursor: learnOpen ? 'pointer' : 'not-allowed'
         },
         badgeStyle: {
-          flex: 'none', width: '40px', height: '40px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '20px', fontWeight: 700,
+          flex: 'none', width: '54px', height: '50px', borderRadius: '12px', display: isFree ? 'none' : 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          fontSize: '24px', fontWeight: 800, lineHeight: 1,
           color: done ? '#fff' : '#5a2a00',
           background: done ? 'linear-gradient(180deg,#4bd0ff,#2a8fd0)' : 'linear-gradient(180deg,#ffcc33,#ff9c1a)',
           boxShadow: done ? '0 3px 0 #175f86' : '0 3px 0 #a24a08'
@@ -1249,11 +1262,11 @@ class Component extends DCLogic {
             'Get at least 2 star in Play to unlock',
             R('span', { style: { position: 'absolute', right: '-5px', bottom: '14px', width: '9px', height: '9px', background: '#2a3050', borderTop: '1px solid rgba(255,255,255,.22)', borderRight: '1px solid rgba(255,255,255,.22)', transform: 'rotate(45deg)' } }))
           : null,
-        badgeEl: done
-          ? R('svg', { width: 26, height: 26, viewBox: '0 0 24 24', style: { display: 'block' } },
+        badgeEl: R(React.Fragment, null, done ? null : R('div', { style: { fontSize: '9px', fontWeight: 800, letterSpacing: '.8px', lineHeight: 1, marginBottom: '3px' } }, 'LESSON'), done
+          ? R('svg', { width: 30, height: 30, viewBox: '0 0 24 24', style: { display: 'block' } },
             R('path', { d: 'M4.5 12.8 L9.6 17.8 L19.5 6.5', fill: 'none', stroke: '#0b4a2a', strokeWidth: 5.2, strokeLinecap: 'round', strokeLinejoin: 'round' }),
             R('path', { d: 'M4.5 12.8 L9.6 17.8 L19.5 6.5', fill: 'none', stroke: '#3ddc84', strokeWidth: 3.2, strokeLinecap: 'round', strokeLinejoin: 'round' }))
-          : String(isFree ? idx + 1 : s.num)
+          : String(isFree ? idx + 1 : s.num))
         };
       }),
       tab: this.state.tab,
@@ -1273,12 +1286,14 @@ class Component extends DCLogic {
       selectTab3: () => { this.playMenuClick(); this.setState({ tab: 3 }); },
       showSongSelect: this.state.songId == null,
       playIcon: this.state.playing ? '❚❚' : '▶',
+      // nút ▶/❚❚ trên cùng bị khoá khi đang đếm 3-2-1
+      playBtnStyle: (() => { const off = this.state.countdown != null; return { width: '40px', height: '40px', borderRadius: '12px', border: '2px solid rgba(255,204,51,.4)', background: 'rgba(0,0,0,.35)', color: '#ffcc33', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: off ? 0.35 : 1, cursor: off ? 'not-allowed' : 'pointer' }; })(),
       showResult: this.state.showResult, showFail: this.state.showFail, rank,
       countEl, armed: this.state.armed,
       showPauseMenu: this.state.songId != null && !this.state.playing && !this.state.showResult && !this.state.showFail && !this.state.armed && !this.state.starting && this.state.countdown == null,
       resume: () => { this.playMenuClick(); this.beginPlay(this.musicPausedAt || 0); },
       quit: () => { this.playMenuClick(); this.stopMusic(); if (this.countTimer) clearTimeout(this.countTimer); this.setState({ songId: null, showResult: false, playing: false, countdown: null }); },
-      togglePlay: () => { if (this.state.songId != null && !this.state.showResult) { this.playMenuClick(); this.last = null; if (this.state.playing) this.stopMusic(); this.setState((s) => ({ playing: !s.playing })); } },
+      togglePlay: () => { if (this.state.songId != null && !this.state.showResult && this.state.countdown == null) { this.playMenuClick(); this.last = null; if (this.state.playing) this.stopMusic(); this.setState((s) => ({ playing: !s.playing })); } },
       restart: () => { this.playMenuClick(); this.stopRainbowSfx(); this.stopMusic(); if (this.countTimer) clearTimeout(this.countTimer); this.ensureAudio(); this.musicPausedAt = 0; this.armedAt = Date.now(); this.setState({ showResult: false, showFail: false, armed: true, playing: false, countdown: null, score: 0, combo: 0, best: 0, hits: 0, nPerfect: 0, nGreat: 0, nGood: 0, nMiss: 0, judge: '' }, () => { this.missStreak = 0; this.scoreFactor = 1; this.beatShown = false; this.learnHitsSinceShow = 0; this.beatFadeStart = 80; this.beatFadeEnd = 88; this.notes = this.buildNotes(); this.status = this.notes.map(() => 'pending'); this.playhead = 0; this.lastMusicStep = -1; this.last = null; this.forceUpdate(); }); },
       backToList: () => { this.playMenuClick(); this.stopRainbowSfx(); this.stopMusic(); if (this.countTimer) clearTimeout(this.countTimer); this.setState({ songId: null, showResult: false, showFail: false, playing: false, countdown: null }); },
       tapBlue: (e) => { e.preventDefault(); if (!blueDisabled) this.hit('blue'); },
